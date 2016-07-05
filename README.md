@@ -1,5 +1,7 @@
 # React Native Tag Input
 
+![alt text](example.png "Example visual")
+
 Simple Example
 
 ```
