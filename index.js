@@ -8,8 +8,6 @@ import {
   Dimensions,
   TouchableWithoutFeedback
 } from 'react-native'
-import Icon from 'react-native-vector-icons/Ionicons'
-import colors from "../../constants/colors"
 import _ from 'lodash'
 class EmailInput extends Component {
   constructor(props) {
@@ -126,7 +124,7 @@ class EmailInput extends Component {
         {value.map((email, index) => {
           return <TouchableOpacity ref={"tag" + index} style={styles.tag} onPress={this.removeIndex.bind(this, index)}>
             <Text style={styles.tagText}>{email}&nbsp;&nbsp;
-              <Icon name="md-close"/></Text>
+              x</Text>
           </TouchableOpacity>
         })}
 
@@ -167,7 +165,7 @@ const styles = StyleSheet.create({
     backgroundColor: "red"
   },
   textInput: {
-    color: colors.defaultTextColor,
+    color: "#777777",
     height: 24,
     fontSize: 16,
     flex: .6,
@@ -178,7 +176,7 @@ const styles = StyleSheet.create({
   tag: {
     padding: 0,
     justifyContent: 'center',
-    backgroundColor: colors.lightGray,
+    backgroundColor: "#cccccc"
     marginTop: 5,
     marginRight: 3,
     flexWrap: 'wrap',
