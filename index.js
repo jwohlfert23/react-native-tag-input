@@ -117,14 +117,25 @@ class EmailInput extends Component {
       ? 100
       : null;
 
+    let tagColor = this.props.tagColor || "#dddddd";
+    let tagTextColor = this.props.tagTextColor || "#777777";
+    let inputColor = this.props.inputColor || "#777777";
+
     return <TouchableWithoutFeedback onPress={() => this.refs.emailInput.focus()} onLayout={this.measureWrapper.bind(this)} style={{
       flex: 1
     }}>
       <View style={styles.wrapper} ref="wrapper" onLayout={this.measureWrapper.bind(this)}>
         {value.map((email, index) => {
-          return <TouchableOpacity ref={"tag" + index} style={styles.tag} onPress={this.removeIndex.bind(this, index)}>
-            <Text style={styles.tagText}>{email}&nbsp;&nbsp;
-              x</Text>
+          return <TouchableOpacity ref={"tag" + index} style={[
+            styles.tag, {
+              backgroundColor: tagColor
+            }
+          ]} onPress={this.removeIndex.bind(this, index)}>
+            <Text style={[
+              styles.tagText, {
+                color: tagTextColor
+              }
+            ]}>{email}&nbsp;&times;</Text>
           </TouchableOpacity>
         })}
 
@@ -133,7 +144,8 @@ class EmailInput extends Component {
         }}>
           <TextInput ref="emailInput" blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
             styles.textInput, {
-              width: width
+              width: width,
+              color: inputColor
             }
           ]} underlineColorAndroid="rgba(0,0,0,0)" onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
         </View>
@@ -143,9 +155,12 @@ class EmailInput extends Component {
 }
 
 EmailInput.PropTypes = {
+  onChange: React.PropTypes.func.isRequired,
+  value: React.PropTypes.array.isRequired,
   regex: React.PropTypes.object,
-  onChange: React.PropTypes.func,
-  value: React.PropTypes.array.isRequired
+  tagColor: React.PropTypes.string,
+  tagTextColor: React.PropTypes.string,
+  inputColor: React.PropTypes.string
 }
 export default EmailInput;
 
@@ -165,7 +180,6 @@ const styles = StyleSheet.create({
     backgroundColor: "red"
   },
   textInput: {
-    color: "#777777",
     height: 24,
     fontSize: 16,
     flex: .6,
@@ -176,7 +190,6 @@ const styles = StyleSheet.create({
   tag: {
     padding: 0,
     justifyContent: 'center',
-    backgroundColor: "#cccccc"
     marginTop: 5,
     marginRight: 3,
     flexWrap: 'wrap',
@@ -185,7 +198,6 @@ const styles = StyleSheet.create({
     borderRadius: 2
   },
   tagText: {
-    color: "#777",
     padding: 0,
     margin: 0
   }
