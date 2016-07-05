@@ -1,0 +1,29 @@
+{
+  "name": "react-native-tag-input",
+  "version": "0.3.0",
+  "description": "A tag input component for react-native",
+  "main": "index.js",
+  "author": "Jack Wohlfert (https://github.com/jwohlfert23)",
+  "keywords": [
+    "react-component",
+    "react-native",
+    "ios",
+    "ui",
+    "email input",
+    "tag input",
+    "emails"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "start": "node_modules/react-native/packager/packager.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jwohlfert23/react-native-tag-input.git"
+  },
+  "devDependencies": {
+    "react": "^15.0.2",
+    "react-native": "^0.26.2",
+    "lodash": "^3.2.0"
+  }
+}
