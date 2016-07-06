@@ -126,7 +126,7 @@ class EmailInput extends Component {
     }}>
       <View style={styles.wrapper} ref="wrapper" onLayout={this.measureWrapper.bind(this)}>
         {value.map((email, index) => {
-          return <TouchableOpacity ref={"tag" + index} style={[
+          return <TouchableOpacity key={index} ref={"tag" + index} style={[
             styles.tag, {
               backgroundColor: tagColor
             }
