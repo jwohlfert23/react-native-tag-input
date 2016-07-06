@@ -52,7 +52,9 @@ class EmailInput extends Component {
     }, 0);
   }
   componentDidMount() {
-    this.calculateWidth();
+    setTimeout(() => {
+      this.calculateWidth();
+    }, 100);
   }
   componentWillReceiveProps() {
     this.calculateWidth();
