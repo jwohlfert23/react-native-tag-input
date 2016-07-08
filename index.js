@@ -149,7 +149,7 @@ class EmailInput extends Component {
               width: width,
               color: inputColor
             }
-          ]} keyboardType={this.props.keyboardType || "email-address"} underlineColorAndroid="rgba(0,0,0,0)" onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
+          ]} autoCapitalize="none" autoCorrect={false} keyboardType={this.props.keyboardType || "email-address"} underlineColorAndroid="rgba(0,0,0,0)" onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
         </View>
       </View>
     </TouchableWithoutFeedback>

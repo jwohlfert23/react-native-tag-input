@@ -1,6 +1,6 @@
 {
   "name": "react-native-tag-input",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "A tag input component for react-native",
   "main": "index.js",
   "author": "Jack Wohlfert (https://github.com/jwohlfert23)",
