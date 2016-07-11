@@ -143,6 +143,7 @@ class EmailInput extends Component {
 
         <View style={{
           width: this.state.inputWidth,
+          height: 36
         }}>
           <TextInput ref="emailInput" blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
             styles.textInput, {
