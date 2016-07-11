@@ -142,7 +142,7 @@ class EmailInput extends Component {
         })}
 
         <View style={{
-          width: this.state.inputWidth
+          width: this.state.inputWidth,
         }}>
           <TextInput ref="emailInput" blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
             styles.textInput, {
@@ -171,28 +171,28 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    alignItems: 'flex-start',
     marginTop: 3,
-    marginBottom: 8
+    marginBottom: 2,
+    alignItems: 'flex-start'
   },
   spacer: {
     flexWrap: 'wrap',
-    height: 24,
+    height: 36,
     width: 0,
     backgroundColor: "red"
   },
   textInput: {
-    height: 24,
+    height: 36,
     fontSize: 16,
     flex: .6,
+    marginBottom: 6,
     padding: 0,
-    marginTop: 6,
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   tag: {
     padding: 0,
     justifyContent: 'center',
-    marginTop: 5,
+    marginTop: 6,
     marginRight: 3,
     flexWrap: 'wrap',
     padding: 8,
