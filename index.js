@@ -1,4 +1,4 @@
-import React, {PropTypes, Component} from 'react'
+import React, {PropTypes, Component} from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
   Dimensions,
   TouchableWithoutFeedback
-} from 'react-native'
-import _ from 'lodash'
+} from 'react-native';
+import _ from 'lodash';
+
 class EmailInput extends Component {
   constructor(props) {
     super(props);
@@ -46,7 +47,7 @@ class EmailInput extends Component {
         if (spaceLeft < 100) {
           this.setState({inputWidth: this.wrapperWidth});
         } else {
-          this.setState({inputWidth: spaceLeft})
+          this.setState({inputWidth: spaceLeft});
         }
       });
     }, 0);
@@ -90,7 +91,7 @@ class EmailInput extends Component {
 
   }
   onKeyPress(event) {
-    if (this.state.text == "" && event.nativeEvent && event.nativeEvent.key == "Backspace") {
+    if (this.state.text === "" && event.nativeEvent && event.nativeEvent.key == "Backspace") {
       this.pop();
     }
   }
@@ -113,11 +114,20 @@ class EmailInput extends Component {
   }
   render() {
     let {text} = this.state;
-    let {value} = this.props;
+    let {value, inputProps} = this.props;
 
-    let width = text.length < 4
-      ? 100
-      : null;
+    let defaultInputProps = {
+      autoCapitalize: "none",
+      autoCorrect: false,
+      placeholder: this.props.placeholder || "Start typing",
+      returnKeyType: this.props.returnKeyType || "done",
+      keyboardType: this.props.keyboardType || "email-address",
+      underlineColorAndroid: "rgba(0,0,0,0)"
+    }
+
+    inputProps = {...defaultInputProps, ...inputProps};
+
+    let width = text.length < 4 ? 100 : null;
 
     let tagColor = this.props.tagColor || "#dddddd";
     let tagTextColor = this.props.tagTextColor || "#777777";
@@ -145,12 +155,12 @@ class EmailInput extends Component {
           width: this.state.inputWidth,
           height: 36
         }}>
-          <TextInput ref="emailInput" blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
+          <TextInput ref="emailInput" {...inputProps} blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
             styles.textInput, {
               width: width,
               color: inputColor
             }
-          ]} autoCapitalize="none" autoCorrect={false} placeholder={this.props.placeholder} returnKeyType={this.props.returnKeyType || "done"} keyboardType={this.props.keyboardType || "email-address"} underlineColorAndroid="rgba(0,0,0,0)" onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
+          ]} onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
         </View>
       </View>
     </TouchableWithoutFeedback>

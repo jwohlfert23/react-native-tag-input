@@ -22,3 +22,4 @@ import TagInput from 'react-native-tag-input';
 | tagColor | Background color of tags |
 | tagTextColor | Text color of tags |
 | inputColor | Color of text input |
+| inputProps | Any misc. TextInput props (autofocus, returnKeyType, etc.) |
