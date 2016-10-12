@@ -17,7 +17,8 @@ class EmailInput extends Component {
 
     this.state = {
       text: "",
-      inputWidth: 200
+      inputWidth: 200,
+      isParsing: false
     };
 
     this.wrapperWidth = width;
@@ -66,7 +67,7 @@ class EmailInput extends Component {
     }
   }
   onChange(event) {
-    if (!event || !event.nativeEvent)
+    if (!event || !event.nativeEvent || this.state.isParsing)
       return;
     let text = event.nativeEvent.text;
     this.setState({text: text});
@@ -74,8 +75,10 @@ class EmailInput extends Component {
 
     let parseWhen = [",", " ", ";"];
 
-    if (parseWhen.indexOf(lastTyped) > -1)
+    if (parseWhen.indexOf(lastTyped) > -1) {
+      this.setState({ isParsing: true });
       this.parseEmails();
+      }
     }
 
   parseEmails() {
@@ -89,6 +92,7 @@ class EmailInput extends Component {
       this.props.onChange(value.concat(results));
     }
 
+    this.setState({ isParsing: false });
   }
   onKeyPress(event) {
     if (this.state.text === "" && event.nativeEvent && event.nativeEvent.key == "Backspace") {
