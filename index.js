@@ -80,13 +80,24 @@ class EmailInput extends Component {
 
   parseEmails() {
     let {text} = this.state;
-    let {value} = this.props;
+    this.setState({text: ""});
+    let {value, limitTagCount} = this.props;
     let regex = this.props.regex || /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
     let results = text.match(regex);
 
     if (results && results.length > 0) {
-      this.setState({text: ""});
-      this.props.onChange(value.concat(results));
+      let resultData = results[0];
+
+      if( value.indexOf(resultData) == -1 ) {
+        if( value.length<(limitTagCount ? limitTagCount : 50) ) {   // default maximum limitTagCount = 50
+          this.props.onChange(value.concat(resultData));
+        } else {
+          value = _.dropRight(value, 1);
+          this.props.onChange(value.concat(resultData));
+        }
+      } else {
+        this.removeIndex(value.indexOf( resultData ));              // if value was already included, remove that value from array
+      }
     }
 
   }
@@ -170,6 +181,7 @@ class EmailInput extends Component {
 EmailInput.PropTypes = {
   onChange: React.PropTypes.func.isRequired,
   value: React.PropTypes.array.isRequired,
+  limitTagCount: React.PropTypes.string,
   regex: React.PropTypes.object,
   tagColor: React.PropTypes.string,
   tagTextColor: React.PropTypes.string,
