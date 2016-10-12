@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import _ from 'lodash';
 
-class EmailInput extends Component {
+class TagInput extends Component {
   constructor(props) {
     super(props);
     let {height, width} = Dimensions.get('window');
@@ -21,7 +21,7 @@ class EmailInput extends Component {
     };
 
     this.wrapperWidth = width;
-    this.parseEmails = this.parseEmails.bind(this);
+    this.parseTags = this.parseTags.bind(this);
     this.onChange = this.onChange.bind(this);
     this.pop = this.pop.bind(this);
     this.calculateWidth = this.calculateWidth.bind(this);
@@ -75,13 +75,13 @@ class EmailInput extends Component {
     let parseWhen = [",", " ", ";"];
 
     if (parseWhen.indexOf(lastTyped) > -1)
-      this.parseEmails();
+      this.parseTags();
     }
 
-  parseEmails() {
+  parseTags() {
     let {text} = this.state;
     let {value} = this.props;
-    let regex = this.props.regex || /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
+    let regex = this.props.regex || /([a-zA-Z0-9=+-_)(*&^%$#@!'"\|]+)/gi;  // for Email >> /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
     let results = text.match(regex);
 
     if (results && results.length > 0) {
@@ -96,19 +96,19 @@ class EmailInput extends Component {
     }
   }
   focus() {
-    if (this.refs.emailInput)
-      this.refs.emailInput.focus();
+    if (this.refs.tagInput)
+      this.refs.tagInput.focus();
     }
   pop() {
-    let emails = _.clone(this.props.value);
-    emails.pop();
-    this.props.onChange(emails);
+    let tags = _.clone(this.props.value);
+    tags.pop();
+    this.props.onChange(tags);
     this.focus();
   }
   removeIndex(index) {
-    let emails = _.clone(this.props.value);
-    emails.splice(index, 1);
-    this.props.onChange(emails);
+    let tags = _.clone(this.props.value);
+    tags.splice(index, 1);
+    this.props.onChange(tags);
     this.focus();
 
   }
@@ -121,7 +121,7 @@ class EmailInput extends Component {
       autoCorrect: false,
       placeholder: this.props.placeholder || "Start typing",
       returnKeyType: this.props.returnKeyType || "done",
-      keyboardType: this.props.keyboardType || "email-address",
+      keyboardType: this.props.keyboardType || "default",  // for Email >> "email-address",
       underlineColorAndroid: "rgba(0,0,0,0)"
     }
 
@@ -133,11 +133,11 @@ class EmailInput extends Component {
     let tagTextColor = this.props.tagTextColor || "#777777";
     let inputColor = this.props.inputColor || "#777777";
 
-    return <TouchableWithoutFeedback onPress={() => this.refs.emailInput.focus()} onLayout={this.measureWrapper.bind(this)} style={{
+    return <TouchableWithoutFeedback onPress={() => this.refs.tagInput.focus()} onLayout={this.measureWrapper.bind(this)} style={{
       flex: 1
     }}>
       <View style={styles.wrapper} ref="wrapper" onLayout={this.measureWrapper.bind(this)}>
-        {value.map((email, index) => {
+        {value.map((tag, index) => {
           return <TouchableOpacity key={index} ref={"tag" + index} style={[
             styles.tag, {
               backgroundColor: tagColor
@@ -147,7 +147,7 @@ class EmailInput extends Component {
               styles.tagText, {
                 color: tagTextColor
               }
-            ]}>{email}&nbsp;&times;</Text>
+            ]}>{tag}&nbsp;&times;</Text>
           </TouchableOpacity>
         })}
 
@@ -155,19 +155,19 @@ class EmailInput extends Component {
           width: this.state.inputWidth,
           height: 36
         }}>
-          <TextInput ref="emailInput" {...inputProps} blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
+          <TextInput ref="tagInput" {...inputProps} blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
             styles.textInput, {
               width: width,
               color: inputColor
             }
-          ]} onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
+          ]} onChange={this.onChange.bind(this)} onSubmitEditing={this.parseTags}/>
         </View>
       </View>
     </TouchableWithoutFeedback>
   }
 }
 
-EmailInput.PropTypes = {
+TagInput.PropTypes = {
   onChange: React.PropTypes.func.isRequired,
   value: React.PropTypes.array.isRequired,
   regex: React.PropTypes.object,
@@ -175,7 +175,7 @@ EmailInput.PropTypes = {
   tagTextColor: React.PropTypes.string,
   inputColor: React.PropTypes.string
 }
-export default EmailInput;
+export default TagInput;
 
 const styles = StyleSheet.create({
   wrapper: {
