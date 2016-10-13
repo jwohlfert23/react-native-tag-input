@@ -150,18 +150,6 @@ class EmailInput extends Component {
             ]}>{email}&nbsp;&times;</Text>
           </TouchableOpacity>
         })}
-
-        <View style={{
-          width: this.state.inputWidth,
-          height: 36
-        }}>
-          <TextInput ref="emailInput" {...inputProps} blurOnSubmit={false} onKeyPress={this.onKeyPress.bind(this)} value={this.state.text} style={[
-            styles.textInput, {
-              width: width,
-              color: inputColor
-            }
-          ]} onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
-        </View>
       </View>
     </TouchableWithoutFeedback>
   }
