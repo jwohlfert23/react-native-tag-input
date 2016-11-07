@@ -11,6 +11,10 @@ import {
 import _ from 'lodash';
 
 class EmailInput extends Component {
+  static defaultProps = {
+    onChangeText: () => {},
+  };
+
   constructor(props) {
     super(props);
     let {height, width} = Dimensions.get('window');
@@ -76,7 +80,7 @@ class EmailInput extends Component {
 
     if (parseWhen.indexOf(lastTyped) > -1)
       this.parseEmails();
-    }
+  }
 
   parseEmails() {
     let {text} = this.state;
@@ -160,7 +164,7 @@ class EmailInput extends Component {
               width: width,
               color: inputColor
             }
-          ]} onChange={this.onChange.bind(this)} onSubmitEditing={this.parseEmails}/>
+          ]} onChange={this.onChange.bind(this)} onChangeText={this.props.onChangeText} onSubmitEditing={this.parseEmails}/>
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -170,6 +174,7 @@ class EmailInput extends Component {
 EmailInput.PropTypes = {
   onChange: React.PropTypes.func.isRequired,
   value: React.PropTypes.array.isRequired,
+  onChangeText: React.PropTypes.func,
   regex: React.PropTypes.object,
   tagColor: React.PropTypes.string,
   tagTextColor: React.PropTypes.string,
