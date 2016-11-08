@@ -15,6 +15,9 @@ const { width } = Dimensions.get('window');
 class EmailInput extends Component {
   static defaultProps = {
     onChangeText: () => {},
+    tagColor: '#dddddd',
+    tagTextColor: '#777777',
+    inputColor: '#777777',
   };
 
   static propTypes = {
@@ -32,27 +35,19 @@ class EmailInput extends Component {
     inputWidth: 200,
   };
 
-  constructor(props) {
-    super(props);
+  _scrollToBottomY = null;
+  wrapperWidth = width;
 
-    this.wrapperWidth = width;
-    this.parseEmails = this.parseEmails.bind(this);
-    this.onChange = this.onChange.bind(this);
-    this.pop = this.pop.bind(this);
-    this.calculateWidth = this.calculateWidth.bind(this);
-    this.focus = this.focus.bind(this);
-  }
-
-  measureWrapper() {
+  measureWrapper = () => {
     if (!this.refs.wrapper)
       return;
 
     this.refs.wrapper.measure((ox, oy, w, /*h, px, py*/) => {
       this.wrapperWidth = w;
     });
-  }
+  };
 
-  calculateWidth() {
+  calculateWidth = () => {
     setTimeout(() => {
       if (!this.refs['tag' + (this.props.value.length - 1)])
         return;
@@ -69,7 +64,7 @@ class EmailInput extends Component {
         }
       });
     }, 0);
-  }
+  };
 
   componentDidMount() {
     setTimeout(() => {
@@ -87,7 +82,7 @@ class EmailInput extends Component {
     }
   }
 
-  onChange(event) {
+  onChange = (event) => {
     if (!event || !event.nativeEvent)
       return;
 
@@ -99,9 +94,9 @@ class EmailInput extends Component {
 
     if (parseWhen.indexOf(lastTyped) > -1)
       this.parseEmails();
-    }
+  };
 
-  parseEmails() {
+  parseEmails = () => {
     const { text } = this.state;
     const { value } = this.props;
 
@@ -112,44 +107,44 @@ class EmailInput extends Component {
       this.setState({ text: '' });
       this.props.onChange(value.concat(results));
     }
-  }
+  };
 
-  onKeyPress(event) {
+  onKeyPress = (event) => {
     if (this.state.text === '' && event.nativeEvent && event.nativeEvent.key == 'Backspace') {
       this.pop();
     }
-  }
+  };
 
-  focus() {
+  focus = () => {
     if (this.refs.emailInput)
       this.refs.emailInput.focus();
-  }
+  };
 
-  pop() {
+  pop = () => {
     const emails = _.clone(this.props.value);
     emails.pop();
     this.props.onChange(emails);
     this.focus();
-  }
+  };
 
-  removeIndex(index) {
+  removeIndex = (index) => {
     const emails = _.clone(this.props.value);
     emails.splice(index, 1);
     this.props.onChange(emails);
     this.focus();
-  }
+  };
 
   render() {
     const { text } = this.state;
-    const { value } = this.props;
+    const { value, tagColor, tagTextColor, inputColor } = this.props;
     let { inputProps } = this.props;
 
     const defaultInputProps = {
       autoCapitalize: 'none',
       autoCorrect: false,
-      placeholder: this.props.placeholder || 'Start typing',
-      returnKeyType: this.props.returnKeyType || 'done',
-      keyboardType: this.props.keyboardType || 'email-address',
+      placeholder: 'Start typing',
+      returnKeyType: 'done',
+      keyboardType: 'email-address',
       underlineColorAndroid: 'rgba(0,0,0,0)',
     }
 
@@ -157,19 +152,15 @@ class EmailInput extends Component {
 
     const width = text.length < 4 ? 100 : null;
 
-    const tagColor = this.props.tagColor || '#dddddd';
-    const tagTextColor = this.props.tagTextColor || '#777777';
-    const inputColor = this.props.inputColor || '#777777';
-
     return (
       <TouchableWithoutFeedback
         onPress={() => this.refs.emailInput.focus()}
-        onLayout={this.measureWrapper.bind(this)}
+        onLayout={this.measureWrapper}
         style={styles.container}>
         <View
           style={styles.wrapper}
           ref="wrapper"
-          onLayout={this.measureWrapper.bind(this)}>
+          onLayout={this.measureWrapper}>
           {value.map((email, index) => (
             <TouchableOpacity
               key={index}
@@ -178,7 +169,7 @@ class EmailInput extends Component {
                 styles.tag, {
                   backgroundColor: tagColor,
                 }]}
-              onPress={this.removeIndex.bind(this, index)}>
+              onPress={() => this.removeIndex(index)}>
               <Text style={[
                 styles.tagText, {
                   color: tagTextColor,
@@ -191,13 +182,13 @@ class EmailInput extends Component {
               ref="emailInput"
               {...inputProps}
               blurOnSubmit={false}
-              onKeyPress={this.onKeyPress.bind(this)}
+              onKeyPress={this.onKeyPress}
               value={this.state.text}
               style={[styles.textInput, {
                 width: width,
                 color: inputColor,
               }]}
-              onChange={this.onChange.bind(this)}
+              onChange={this.onChange}
               onChangeText={this.props.onChangeText}
               onSubmitEditing={this.parseEmails}/>
           </View>
