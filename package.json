@@ -1,29 +1,34 @@
 {
   "name": "react-native-tag-input",
-  "version": "0.0.12",
   "description": "A tag input component for react-native",
-  "main": "index.js",
+  "version": "0.0.12",
   "author": "Jack Wohlfert (https://github.com/jwohlfert23)",
+  "devDependencies": {
+    "babel-eslint": "^7.1.0",
+    "eslint": "^3.9.1",
+    "eslint-plugin-react": "latest",
+    "eslint-plugin-react-native": "latest",
+    "lodash": "^3.2.0",
+    "react": "^15.0.2",
+    "react-native": "^0.26.2"
+  },
   "keywords": [
+    "email input",
+    "emails",
+    "ios",
     "react-component",
     "react-native",
-    "ios",
-    "ui",
-    "email input",
     "tag input",
-    "emails"
+    "ui"
   ],
   "license": "MIT",
-  "scripts": {
-    "start": "node_modules/react-native/packager/packager.sh"
-  },
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:jwohlfert23/react-native-tag-input.git"
   },
-  "devDependencies": {
-    "react": "^15.0.2",
-    "react-native": "^0.26.2",
-    "lodash": "^3.2.0"
+  "scripts": {
+    "start": "node_modules/react-native/packager/packager.sh",
+    "lint": "eslint index.js"
   }
 }
