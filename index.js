@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import {
   View,
   Text,
@@ -72,6 +72,18 @@ type Event = {
 };
 
 class TagInput extends Component {
+  static propTypes = {
+    onChange: PropTypes.func.isRequired,
+    value: PropTypes.array.isRequired,
+    regex: PropTypes.object,
+    tagColor: PropTypes.string,
+    tagTextColor: PropTypes.string,
+    inputColor: PropTypes.string,
+    inputProps: PropTypes.object,
+    labelKey: PropTypes.string,
+    numberOfLines: PropTypes.number,
+  };
+
   props: Props;
   state: State = {
     text: '',
