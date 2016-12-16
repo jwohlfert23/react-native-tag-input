@@ -18,6 +18,7 @@ import TagInput from 'react-native-tag-input';
 -----------------------|-----------------
 | onChange | (Required) A handler to be called when array of emails/tags change |
 | value | (Required) An array of tags |
+| separators | An array os characters to use as tag separators |
 | regex | A RegExp to test tags after enter, space, or a comma is pressed |
 | tagColor | Background color of tags |
 | tagTextColor | Text color of tags |
