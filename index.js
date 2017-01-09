@@ -283,7 +283,6 @@ class TagInput extends Component {
               <View style={[styles.textInputContainer, { width: this.state.inputWidth }]}>
                 <TextInput
                   ref="tagInput"
-                  {...inputProps}
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
                   value={text}
@@ -293,6 +292,7 @@ class TagInput extends Component {
                 }]}
                   onChange={this.onChange}
                   onSubmitEditing={this.parseTags}
+                  {...inputProps}
                 />
               </View>
             </View>
