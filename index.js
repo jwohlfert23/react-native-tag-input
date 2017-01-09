@@ -71,6 +71,9 @@ type Event = {
   nativeEvent: NativeEvent,
 };
 
+const DEFAULT_SEPARATORS = [',', ' ', ';'];
+const DEFAULT_TAG_REGEX = /(.+)/gi
+
 class TagInput extends Component {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
@@ -161,7 +164,7 @@ class TagInput extends Component {
     this.setState({ text: text });
     const lastTyped = text.charAt(text.length - 1);
 
-    const parseWhen = [',', ' ', ';'];
+    const parseWhen = this.props.separators || DEFAULT_SEPARATORS;
 
     if (parseWhen.indexOf(lastTyped) > -1)
       this.parseTags();
@@ -171,7 +174,7 @@ class TagInput extends Component {
     const { text } = this.state;
     const { value } = this.props;
 
-    const regex = this.props.regex || /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
+    const regex = this.props.regex || DEFAULT_TAG_REGEX;
     const results = text.match(regex);
 
     if (results && results.length > 0) {
@@ -348,3 +351,5 @@ const styles = StyleSheet.create({
 });
 
 export default TagInput;
+
+export { DEFAULT_SEPARATORS, DEFAULT_TAG_REGEX }
