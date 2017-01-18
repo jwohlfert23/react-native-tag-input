@@ -71,7 +71,7 @@ type Event = {
   nativeEvent: NativeEvent,
 };
 
-const DEFAULT_SEPARATORS = [',', ' ', ';'];
+const DEFAULT_SEPARATORS = [',', ' ', ';', '\n'];
 const DEFAULT_TAG_REGEX = /(.+)/gi
 
 class TagInput extends Component {
