@@ -22,6 +22,8 @@ import TagInput from 'react-native-tag-input';
 | regex | A RegExp to test tags after enter, space, or a comma is pressed |
 | tagColor | Background color of tags |
 | tagTextColor | Text color of tags |
+| tagContainerStyle | Styling override for container surrounding tag text. |
+| tagTextStyle | Styling overrride for tag's text component |
 | inputColor | Color of text input |
 | inputProps | Any misc. TextInput props (autofocus, returnKeyType, etc.) |
 | labelKey | String. Label key if tag is an object, (tag[labelKey]) |
