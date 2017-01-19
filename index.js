@@ -227,9 +227,9 @@ class TagInput extends Component {
       <TouchableOpacity
         key={index}
         ref={'tag' + index}
-        style={[styles.tag, { backgroundColor: tagColor }]}
+        style={[styles.tag, { backgroundColor: tagColor }, this.props.tagContainerStyle]}
         onPress={() => this.removeIndex(index)}>
-        <Text style={[styles.tagText, { color: tagTextColor }]}>
+        <Text style={[styles.tagText, { color: tagTextColor }, this.props.tagTextStyle]}>
           {this._getLabelValue(tag)}&nbsp;&times;
         </Text>
       </TouchableOpacity>
