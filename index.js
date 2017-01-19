@@ -179,7 +179,7 @@ class TagInput extends Component {
 
     if (results && results.length > 0) {
       this.setState({ text: '' });
-      this.props.onChange(value.concat(results));
+      this.props.onChange([...new Set([...value, ...results])]);
     }
   };
 
