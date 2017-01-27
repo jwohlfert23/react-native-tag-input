@@ -256,9 +256,10 @@ class TagInput extends Component {
     }
   };
 
-  render() {
-    const { text, inputWidth, lines } = this.state;
-    const { value, inputColor } = this.props;
+  renderInputTag = () => {
+    const { text, inputWidth } = this.state
+    const { inputColor } = this.props;
+    const width = inputWidth ? inputWidth : 400;
 
     const defaultInputProps = {
       autoCapitalize: 'none',
@@ -271,9 +272,29 @@ class TagInput extends Component {
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
 
-    const wrapperHeight = (lines - 1) * 40 + 36;
+    return (
+      <TextInput
+        ref="tagInput"
+        blurOnSubmit={false}
+        onKeyPress={this.onKeyPress}
+        value={text}
+        style={[styles.textInput, {
+          width: width,
+          color: inputColor,
+        }]}
+        onChange={this.onChange}
+        onBlur={this.onBlur}
+        onSubmitEditing={this.parseTags}
+        {...inputProps}
+      />
+    )
+  }
 
-    const width = inputWidth ? inputWidth : 400;
+  render() {
+    const { lines } = this.state;
+    const { value } = this.props;
+
+    const wrapperHeight = (lines - 1) * 40 + 36;
 
     return (
       <TouchableWithoutFeedback
@@ -293,20 +314,7 @@ class TagInput extends Component {
             <View style={styles.tagInputContainer}>
               {value.map((tag, index) => this._renderTag(tag, index))}
               <View style={[styles.textInputContainer, { width: this.state.inputWidth }]}>
-                <TextInput
-                  ref="tagInput"
-                  blurOnSubmit={false}
-                  onKeyPress={this.onKeyPress}
-                  value={text}
-                  style={[styles.textInput, {
-                  width: width,
-                  color: inputColor,
-                }]}
-                  onBlur={this.onBlur}
-                  onChange={this.onChange}
-                  onSubmitEditing={this.parseTags}
-                  {...inputProps}
-                />
+                {this.renderInputTag()}
               </View>
             </View>
           </ScrollView>
