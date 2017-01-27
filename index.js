@@ -230,6 +230,15 @@ class TagInput extends Component {
     return tag;
   };
 
+  scrollToBottom = (animated: boolean = true) => {
+    if (this.contentHeight > this.scrollViewHeight) {
+      this.refs.scrollView.scrollTo({
+        y: this.contentHeight - this.scrollViewHeight,
+        animated,
+      });
+    }
+  };
+
   _renderTag = (tag, index) => {
     const { tagColor, tagTextColor } = this.props;
 
@@ -246,17 +255,8 @@ class TagInput extends Component {
     );
   };
 
-  scrollToBottom = (animated: boolean = true) => {
-    if (this.contentHeight > this.scrollViewHeight) {
-      this.refs.scrollView.scrollTo({
-        y: this.contentHeight - this.scrollViewHeight,
-        animated,
-      });
-    }
-  };
-
   _renderInput = () => {
-    const { text, inputWidth } = this.state
+    const { text, inputWidth } = this.state;
     const { inputColor } = this.props;
     const width = inputWidth ? inputWidth : 400;
 
@@ -277,21 +277,21 @@ class TagInput extends Component {
       }],
       onChange: this.onChange,
       onBlur: this.onBlur,
-      onSubmitEditing: this.parseTags
+      onSubmitEditing: this.parseTags,
     };
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
 
     if (this.props.inputRenderer) {
-      return this.props.inputRenderer(inputProps)
+      return this.props.inputRenderer(inputProps);
     }
 
     return (
       <TextInput
         {...inputProps}
       />
-    )
-  }
+    );
+  };
 
   render() {
     const { lines } = this.state;
@@ -352,7 +352,6 @@ const styles = StyleSheet.create({
     flex: .6,
     marginBottom: 6,
     padding: 0,
-
   },
   textInputContainer: {
     height: 36,
@@ -373,4 +372,4 @@ const styles = StyleSheet.create({
 
 export default TagInput;
 
-export { DEFAULT_SEPARATORS, DEFAULT_TAG_REGEX }
+export { DEFAULT_SEPARATORS, DEFAULT_TAG_REGEX };
