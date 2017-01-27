@@ -170,6 +170,15 @@ class TagInput extends Component {
       this.parseTags();
   };
 
+  onBlur = (event: Event) => {
+    if (!event || !event.nativeEvent || !this.props.parseOnBlur)
+      return;
+
+    const text = event.nativeEvent.text;
+    this.setState({ text: text });
+    this.parseTags();
+  };
+
   parseTags = () => {
     const { text } = this.state;
     const { value } = this.props;
@@ -293,6 +302,7 @@ class TagInput extends Component {
                   width: width,
                   color: inputColor,
                 }]}
+                  onBlur={this.onBlur}
                   onChange={this.onChange}
                   onSubmitEditing={this.parseTags}
                   {...inputProps}

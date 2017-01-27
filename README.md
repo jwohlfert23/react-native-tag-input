@@ -27,4 +27,5 @@ import TagInput from 'react-native-tag-input';
 | inputColor | Color of text input |
 | inputProps | Any misc. TextInput props (autofocus, returnKeyType, etc.) |
 | labelKey | String. Label key if tag is an object, (tag[labelKey]) |
-| numberOfLines | number. Number of maximum lines of the tag input |
+| numberOfLines | Number. Number of maximum lines of the tag input |
+| parseOnBlur | Boolean. If true, will check for tags on input blur |
