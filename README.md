@@ -34,12 +34,12 @@ const autoCompleteRenderer = (tagInputProps) => {
         }
       })
     }
-  }
+  };
 
   return (
     <AutoComplete {...autoCompleteProps} />
-  )
-}
+  );
+};
 
 <TagInput
   value={this.state.tags}
