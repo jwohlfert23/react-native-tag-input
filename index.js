@@ -156,6 +156,15 @@ class TagInput extends Component {
     }
   }
 
+  onBlur = (event: Event) => {
+    if (!event || !event.nativeEvent || !this.props.parseOnBlur)
+      return;
+
+    const text = event.nativeEvent.text;
+    this.setState({ text: text });
+    this.parseTags(text);
+  };
+
   onChange = (event: Event) => {
     if (!event || !event.nativeEvent)
       return;
@@ -166,20 +175,14 @@ class TagInput extends Component {
 
     const parseWhen = this.props.separators || DEFAULT_SEPARATORS;
     if (parseWhen.indexOf(lastTyped) > -1)
-      this.parseTags();
+      this.parseTags(text.slice(0, -1));
   };
 
-  onBlur = (event: Event) => {
-    if (!event || !event.nativeEvent || !this.props.parseOnBlur)
-      return;
+  parseTags = (text) => {
+    if (!text) {
+      text = this.state.text;
+    }
 
-    const text = event.nativeEvent.text;
-    this.setState({ text: text });
-    this.parseTags();
-  };
-
-  parseTags = () => {
-    const { text } = this.state;
     const { value } = this.props;
     const regex = this.props.regex || DEFAULT_TAG_REGEX;
     const results = text.match(regex);
