@@ -19,11 +19,15 @@ type Props = {
   /**
    * A handler to be called when array of tags change
    */
-    onChange: (items: Array<any> ) => void,
+    onChange: (items: Array<any>) => void,
   /**
    * An array of tags
    */
     value: Array<any>,
+  /**
+   * An array os characters to use as tag separators
+   */
+    separators: Array<string>,
   /**
    * A RegExp to test tags after enter, space, or a comma is pressed
    */
@@ -36,6 +40,14 @@ type Props = {
    * Text color of tags
    */
     tagTextColor?: string,
+  /**
+   * Styling override for container surrounding tag text
+   */
+    tagContainerStyle?: Object,
+  /**
+   * Styling overrride for tag's text component
+   */
+    tagTextStyle?: Object,
   /**
    * Color of text input
    */
