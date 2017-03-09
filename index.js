@@ -11,7 +11,6 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
 } from 'react-native';
-import _ from 'lodash';
 
 const { width } = Dimensions.get('window');
 
@@ -216,14 +215,14 @@ class TagInput extends Component {
   };
 
   pop = () => {
-    const tags = _.clone(this.props.value);
+    const tags = [...this.props.value];
     tags.pop();
     this.props.onChange(tags);
     this.focus();
   };
 
   removeIndex = (index: number) => {
-    const tags = _.clone(this.props.value);
+    const tags = [...this.props.value];
     tags.splice(index, 1);
     this.props.onChange(tags);
     this.focus();
