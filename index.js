@@ -167,6 +167,15 @@ class TagInput extends Component {
     }
   }
 
+  onBlur = (event: Event) => {
+    if (!event || !event.nativeEvent || !this.props.parseOnBlur)
+      return;
+
+    const text = event.nativeEvent.text;
+    this.setState({ text: text });
+    this.parseTags(text);
+  };
+
   onChange = (event: Event) => {
     if (!event || !event.nativeEvent)
       return;
@@ -176,24 +185,16 @@ class TagInput extends Component {
     const lastTyped = text.charAt(text.length - 1);
 
     const parseWhen = this.props.separators || DEFAULT_SEPARATORS;
-
     if (parseWhen.indexOf(lastTyped) > -1)
-      this.parseTags();
+      this.parseTags(text.slice(0, -1));
   };
 
-  onBlur = (event: Event) => {
-    if (!event || !event.nativeEvent || !this.props.parseOnBlur)
-      return;
+  parseTags = (text) => {
+    if (!text) {
+      text = this.state.text;
+    }
 
-    const text = event.nativeEvent.text;
-    this.setState({ text: text });
-    this.parseTags();
-  };
-
-  parseTags = () => {
-    const { text } = this.state;
     const { value } = this.props;
-
     const regex = this.props.regex || DEFAULT_TAG_REGEX;
     const results = text.match(regex);
 
@@ -240,6 +241,15 @@ class TagInput extends Component {
     return tag;
   };
 
+  scrollToBottom = (animated: boolean = true) => {
+    if (this.contentHeight > this.scrollViewHeight) {
+      this.refs.scrollView.scrollTo({
+        y: this.contentHeight - this.scrollViewHeight,
+        animated,
+      });
+    }
+  };
+
   _renderTag = (tag, index) => {
     const { tagColor, tagTextColor } = this.props;
 
@@ -256,20 +266,10 @@ class TagInput extends Component {
     );
   };
 
-
-
-  scrollToBottom = (animated: boolean = true) => {
-    if (this.contentHeight > this.scrollViewHeight) {
-      this.refs.scrollView.scrollTo({
-        y: this.contentHeight - this.scrollViewHeight,
-        animated,
-      });
-    }
-  };
-
-  render() {
-    const { text, inputWidth, lines } = this.state;
-    const { value, inputColor } = this.props;
+  _renderInput = () => {
+    const { text, inputWidth } = this.state;
+    const { inputColor } = this.props;
+    const width = inputWidth ? inputWidth : 400;
 
     const defaultInputProps = {
       autoCapitalize: 'none',
@@ -278,17 +278,41 @@ class TagInput extends Component {
       returnKeyType: 'done',
       keyboardType: 'default',
       underlineColorAndroid: 'rgba(0,0,0,0)',
-    }
+      ref: "tagInput",
+      blurOnSubmit: false,
+      onKeyPress: this.onKeyPress,
+      value: text,
+      style: [styles.textInput, {
+        width: width,
+        color: inputColor,
+      }],
+      onChange: this.onChange,
+      onBlur: this.onBlur,
+      onSubmitEditing: this.parseTags,
+    };
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
 
-    const wrapperHeight = (lines - 1) * 40 + 36;
+    if (this.props.inputRenderer) {
+      return this.props.inputRenderer(inputProps);
+    }
 
-    const width = inputWidth ? inputWidth : 400;
+    return (
+      <TextInput
+        {...inputProps}
+      />
+    );
+  };
+
+  render() {
+    const { lines } = this.state;
+    const { value } = this.props;
+
+    const wrapperHeight = (lines - 1) * 40 + 36;
 
     return (
       <TouchableWithoutFeedback
-        onPress={() => this.refs.tagInput.focus()}
+        onPress={() => this.refs.tagInput ? this.refs.tagInput.focus() : null}
         onLayout={this.measureWrapper}
         style={[styles.container]}>
         <View
@@ -304,20 +328,7 @@ class TagInput extends Component {
             <View style={styles.tagInputContainer}>
               {value.map((tag, index) => this._renderTag(tag, index))}
               <View style={[styles.textInputContainer, { width: this.state.inputWidth }]}>
-                <TextInput
-                  ref="tagInput"
-                  blurOnSubmit={false}
-                  onKeyPress={this.onKeyPress}
-                  value={text}
-                  style={[styles.textInput, {
-                  width: width,
-                  color: inputColor,
-                }]}
-                  onBlur={this.onBlur}
-                  onChange={this.onChange}
-                  onSubmitEditing={this.parseTags}
-                  {...inputProps}
-                />
+                {this._renderInput()}
               </View>
             </View>
           </ScrollView>
@@ -352,7 +363,6 @@ const styles = StyleSheet.create({
     flex: .6,
     marginBottom: 6,
     padding: 0,
-
   },
   textInputContainer: {
     height: 36,
@@ -373,4 +383,4 @@ const styles = StyleSheet.create({
 
 export default TagInput;
 
-export { DEFAULT_SEPARATORS, DEFAULT_TAG_REGEX }
+export { DEFAULT_SEPARATORS, DEFAULT_TAG_REGEX };
