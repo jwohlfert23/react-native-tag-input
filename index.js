@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
-this.removeIndex(index)
+
 type Props = {
   /**
    * A handler to be called when array of tags change
@@ -67,6 +67,11 @@ type Props = {
    *  maximum number of lines of this component
    */
     numberOfLines: number,
+  /**
+   *  Allow hiding the x on tags
+   */
+    hideClose: boolean,
+
 };
 
 type State = {
@@ -118,6 +123,7 @@ class TagInput extends Component {
 
   static defaultProps = {
     onPress: null,
+    hideClose: false,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
@@ -248,6 +254,7 @@ class TagInput extends Component {
 
   _renderTag = (tag, index) => {
     const { tagColor, tagTextColor } = this.props;
+    const hideClose = this.props.hideClose ? null : "\u00a0\u00D7";
 
     return (
       <TouchableOpacity
@@ -256,7 +263,8 @@ class TagInput extends Component {
         style={[styles.tag, { backgroundColor: tagColor }, this.props.tagContainerStyle]}
         onPress={() => this.props.onPress ? this.props.onPress(index) : this.removeIndex(index)}>
         <Text style={[styles.tagText, { color: tagTextColor }, this.props.tagTextStyle]}>
-          {this._getLabelValue(tag)}&nbsp;&times;
+          {this._getLabelValue(tag)}
+          {hideClose}
         </Text>
       </TouchableOpacity>
     );
