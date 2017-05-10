@@ -19,7 +19,7 @@ type Props = {
    * A handler to be called when array of tags change
    */
     onChange: (items: Array<any>) => void,
-      /**
+  /**
    * A handler to be called when a tag is clicked
    */
     onPress: (item: Object) => void,
