@@ -30,3 +30,4 @@ import TagInput from 'react-native-tag-input';
 | labelKey | String. Label key if tag is an object, (tag[labelKey]) |
 | numberOfLines | Number. Number of maximum lines of the tag input |
 | parseOnBlur | Boolean. If true, will check for tags on input blur |
+| hideClose | Boolean. If true, will hide the x mark on tags |
