@@ -13,12 +13,16 @@ import {
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
-
+this.removeIndex(index)
 type Props = {
   /**
    * A handler to be called when array of tags change
    */
     onChange: (items: Array<any>) => void,
+      /**
+   * A handler to be called when a tag is clicked
+   */
+    onPress: (item: Object) => void,
   /**
    * An array of tags
    */
@@ -89,6 +93,7 @@ class TagInput extends Component {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
     value: PropTypes.array.isRequired,
+    onPress: PropTypes.func,
     regex: PropTypes.object,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
@@ -112,6 +117,7 @@ class TagInput extends Component {
   scrollViewHeight: 0;
 
   static defaultProps = {
+    onPress: null,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
@@ -248,7 +254,7 @@ class TagInput extends Component {
         key={index}
         ref={'tag' + index}
         style={[styles.tag, { backgroundColor: tagColor }, this.props.tagContainerStyle]}
-        onPress={() => this.removeIndex(index)}>
+        onPress={() => this.props.onPress ? this.props.onPress(index) : this.removeIndex(index)}>
         <Text style={[styles.tagText, { color: tagTextColor }, this.props.tagTextStyle]}>
           {this._getLabelValue(tag)}&nbsp;&times;
         </Text>
