@@ -31,3 +31,4 @@ import TagInput from 'react-native-tag-input';
 | numberOfLines | Number. Number of maximum lines of the tag input |
 | parseOnBlur | Boolean. If true, will check for tags on input blur |
 | hideClose | Boolean. If true, will hide the x mark on tags |
+| editable | Boolean. If false, will disable input |

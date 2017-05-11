@@ -71,7 +71,10 @@ type Props = {
    *  Allow hiding the x on tags
    */
     hideClose: boolean,
-
+  /**
+   *  Allow or stop text editing
+   */
+    editable: boolean,
 };
 
 type State = {
@@ -123,6 +126,7 @@ class TagInput extends Component {
 
   static defaultProps = {
     onPress: null,
+    editable: true,
     hideClose: false,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
@@ -323,6 +327,7 @@ class TagInput extends Component {
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
                   value={text}
+                  editable={this.props.editable}
                   style={[styles.textInput, {
                   width: width,
                   color: inputColor,
