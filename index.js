@@ -20,6 +20,10 @@ type Props = {
    */
     onChange: (items: Array<any>) => void,
   /**
+   * A handler to be called when a tag is clicked
+   */
+    onPress: (item: Object) => void,
+  /**
    * An array of tags
    */
     value: Array<any>,
@@ -63,6 +67,14 @@ type Props = {
    *  maximum number of lines of this component
    */
     numberOfLines: number,
+  /**
+   *  Allow hiding the x on tags
+   */
+    hideClose: boolean,
+  /**
+   *  Allow or stop text editing
+   */
+    editable: boolean,
 };
 
 type State = {
@@ -89,6 +101,7 @@ class TagInput extends Component {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
     value: PropTypes.array.isRequired,
+    onPress: PropTypes.func,
     regex: PropTypes.object,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
@@ -112,6 +125,9 @@ class TagInput extends Component {
   scrollViewHeight: 0;
 
   static defaultProps = {
+    onPress: null,
+    editable: true,
+    hideClose: false,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
@@ -242,15 +258,17 @@ class TagInput extends Component {
 
   _renderTag = (tag, index) => {
     const { tagColor, tagTextColor } = this.props;
+    const hideClose = this.props.hideClose ? null : "\u00a0\u00D7";
 
     return (
       <TouchableOpacity
         key={index}
         ref={'tag' + index}
         style={[styles.tag, { backgroundColor: tagColor }, this.props.tagContainerStyle]}
-        onPress={() => this.removeIndex(index)}>
+        onPress={() => this.props.onPress ? this.props.onPress(index) : this.removeIndex(index)}>
         <Text style={[styles.tagText, { color: tagTextColor }, this.props.tagTextStyle]}>
-          {this._getLabelValue(tag)}&nbsp;&times;
+          {this._getLabelValue(tag)}
+          {hideClose}
         </Text>
       </TouchableOpacity>
     );
@@ -309,6 +327,7 @@ class TagInput extends Component {
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
                   value={text}
+                  editable={this.props.editable}
                   style={[styles.textInput, {
                   width: width,
                   color: inputColor,
