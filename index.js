@@ -222,9 +222,15 @@ class TagInput extends Component {
   };
 
   removeIndex = (index: number) => {
-    const tags = [...this.props.value];
+    const tags = _.clone(this.props.value);
     tags.splice(index, 1);
     this.props.onChange(tags);
+    
+    // trigger rerender for actual tag removal
+    const { text } = this.state;
+    this.setState({ text: text });
+    //
+
     this.focus();
   };
 
