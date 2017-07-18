@@ -15,10 +15,11 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   ScrollView,
+  ViewPropTypes,
 } from 'react-native';
 import invariant from 'invariant';
 
-const { windowWidth } = Dimensions.get('window');
+const windowWidth = Dimensions.get('window').width;
 
 type TagData = string | {[key: string]: string};
 const tagDataPropType = PropTypes.oneOfType([
@@ -102,11 +103,12 @@ class TagInput extends React.PureComponent {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
     value: PropTypes.arrayOf(tagDataPropType).isRequired,
+    separators: PropTypes.arrayOf(PropTypes.string),
     regex: PropTypes.object,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
-    tagContainerStyle: View.propTypes,
-    tagTextStyle: Text.propTypes,
+    tagContainerStyle: ViewPropTypes.style,
+    tagTextStyle: Text.propTypes.style,
     inputColor: PropTypes.string,
     inputProps: PropTypes.object,
     labelKey: PropTypes.string,
@@ -345,8 +347,8 @@ class Tag extends React.PureComponent {
     labelKey: PropTypes.string,
     tagColor: PropTypes.string.isRequired,
     tagTextColor: PropTypes.string.isRequired,
-    tagContainerStyle: View.propTypes,
-    tagTextStyle: Text.propTypes,
+    tagContainerStyle: ViewPropTypes.style,
+    tagTextStyle: Text.propTypes.style,
   };
 
   render() {
