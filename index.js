@@ -245,10 +245,10 @@ class TagInput extends React.PureComponent {
       <TouchableWithoutFeedback
         onPress={this.focus}
         style={[styles.container]}
+        onLayout={this.measureWrapper}
       >
         <View
           style={[styles.wrapper, { height: wrapperHeight }]}
-          onLayout={this.measureWrapper}
         >
           <ScrollView
             ref={this.scrollViewRef}
