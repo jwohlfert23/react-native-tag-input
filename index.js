@@ -1,6 +1,7 @@
 // @flow
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   View,
   Text,
@@ -26,7 +27,7 @@ type Props = {
   /**
    * An array os characters to use as tag separators
    */
-    separators: Array<string>,
+    separators?: Array<string>,
   /**
    * A RegExp to test tags after enter, space, or a comma is pressed
    */
@@ -62,7 +63,7 @@ type Props = {
   /**
    *  maximum number of lines of this component
    */
-    numberOfLines: number,
+    numberOfLines?: number,
 };
 
 type State = {
@@ -225,7 +226,6 @@ class TagInput extends Component {
     const tags = [...this.props.value];
     tags.splice(index, 1);
     this.props.onChange(tags);
-    this.focus();
   };
 
   _getLabelValue = (tag) => {
@@ -274,7 +274,7 @@ class TagInput extends Component {
     const defaultInputProps = {
       autoCapitalize: 'none',
       autoCorrect: false,
-      placeholder: 'Start typing',
+      placeholder: 'username',
       returnKeyType: 'done',
       keyboardType: 'default',
       underlineColorAndroid: 'rgba(0,0,0,0)',
@@ -300,6 +300,7 @@ class TagInput extends Component {
             style={styles.tagInputContainerScroll}
             onContentSizeChange={(w, h) => this.contentHeight = h}
             onLayout={ev => this.scrollViewHeight = ev.nativeEvent.layout.height}
+            keyboardShouldPersistTaps='handled'
           >
             <View style={styles.tagInputContainer}>
               {value.map((tag, index) => this._renderTag(tag, index))}
@@ -310,9 +311,9 @@ class TagInput extends Component {
                   onKeyPress={this.onKeyPress}
                   value={text}
                   style={[styles.textInput, {
-                  width: width,
-                  color: inputColor,
-                }]}
+                    width: width,
+                    color: inputColor,
+                  }]}
                   onBlur={this.onBlur}
                   onChange={this.onChange}
                   onSubmitEditing={this.parseTags}
@@ -332,11 +333,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   wrapper: {
-    flex: 1,
-    flexDirection: 'row',
-    marginTop: 3,
-    marginBottom: 2,
-    alignItems: 'flex-start',
   },
   tagInputContainerScroll: {
     flex: 1,
@@ -347,27 +343,27 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   textInput: {
-    height: 36,
-    fontSize: 16,
+    fontSize: 18,
     flex: .6,
-    marginBottom: 6,
     padding: 0,
-
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 0,
   },
   textInputContainer: {
-    height: 36,
   },
   tag: {
     justifyContent: 'center',
-    marginTop: 6,
+    marginTop: 3,
     marginRight: 3,
-    padding: 8,
-    height: 24,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
     borderRadius: 2,
   },
   tagText: {
     padding: 0,
     margin: 0,
+    fontSize: 16,
   },
 });
 

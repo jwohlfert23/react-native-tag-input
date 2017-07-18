@@ -25,5 +25,8 @@
   "scripts": {
     "start": "node_modules/react-native/packager/packager.sh",
     "lint": "eslint src"
+  },
+  "dependencies": {
+    "prop-types": "^15.5.10"
   }
 }
