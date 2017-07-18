@@ -27,6 +27,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "invariant": "^2.2.2",
     "prop-types": "^15.5.10"
   }
 }
