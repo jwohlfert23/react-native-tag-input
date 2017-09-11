@@ -4,8 +4,9 @@
   "version": "0.0.14",
   "author": "Jack Wohlfert (https://github.com/jwohlfert23)",
   "devDependencies": {
-    "react": "^15.0.2",
-    "react-native": "^0.26.2"
+    "react": "^16.0.0-alpha.12",
+    "react-native": "^0.48.2",
+    "flow-bin": "^0.51.1"
   },
   "keywords": [
     "email input",

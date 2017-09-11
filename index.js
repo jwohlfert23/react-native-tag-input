@@ -16,93 +16,85 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   ViewPropTypes,
+  Platform,
 } from 'react-native';
 import invariant from 'invariant';
 
 const windowWidth = Dimensions.get('window').width;
 
-type TagData = string | {[key: string]: string};
-const tagDataPropType = PropTypes.oneOfType([
-  PropTypes.string,
-  PropTypes.object,
-]);
-
-type Props = {
+type RequiredProps<T> = {
   /**
    * A handler to be called when array of tags change
+   * When new tags are added, they are appended as strings
    */
-    onChange: (items: $ReadOnlyArray<TagData>) => void,
+  onChange: (items: $ReadOnlyArray<T | string>) => void,
   /**
    * An array of tags
    */
-    value: $ReadOnlyArray<TagData>,
-  /**
-   * An array os characters to use as tag separators
-   */
-    separators?: $ReadOnlyArray<string>,
-  /**
-   * A RegExp to test tags after enter, space, or a comma is pressed
-   */
-    regex?: RegExp,
-  /**
-   * Background color of tags
-   */
-    tagColor: string,
-  /**
-   * Text color of tags
-   */
-    tagTextColor: string,
-  /**
-   * Styling override for container surrounding tag text
-   */
-    tagContainerStyle?: StyleObj,
-  /**
-   * Styling overrride for tag's text component
-   */
-    tagTextStyle?: StyleObj,
-  /**
-   * Color of text input
-   */
-    inputColor: string,
-  /**
-   * TextInput props Text.propTypes
-   */
-    inputProps?: $PropertyType<Text, 'props'>,
+  value: $ReadOnlyArray<T>,
   /**
    * path of the label in tags objects
    */
-    labelKey?: string,
-  /**
-   *  maximum number of lines of this component
-   */
-    numberOfLines: number,
+  labelExtractor: (tagData: T) => string,
 };
-
+type OptionalProps = {
+  /**
+   * An array of characters to use as tag separators
+   */
+  separators: $ReadOnlyArray<string>,
+  /**
+   * A RegExp to test tags after enter, space, or a comma is pressed
+   */
+  regex: RegExp,
+  /**
+   * Background color of tags
+   */
+  tagColor: string,
+  /**
+   * Text color of tags
+   */
+  tagTextColor: string,
+  /**
+   * Styling override for container surrounding tag text
+   */
+  tagContainerStyle?: StyleObj,
+  /**
+   * Styling overrride for tag's text component
+   */
+  tagTextStyle?: StyleObj,
+  /**
+   * Color of text input
+   */
+  inputColor: string,
+  /**
+   * TextInput props TextInput.propTypes
+   */
+  inputProps?: $PropertyType<TextInput, 'props'>,
+  /**
+   * maximum number of lines of this component
+   */
+  numberOfLines: number,
+  /**
+   * whether to treat a blur event as a separator entry (iOS-only)
+   */
+  parseOnBlur: bool,
+};
+type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
   text: string,
   inputWidth: ?number,
   lines: number,
 };
 
-type NativeEvent = {
-  target: number,
-  key: string,
-  eventCount: number,
-  text: string,
-};
-
-type Event = {
-  nativeEvent: NativeEvent,
-};
-
 const DEFAULT_SEPARATORS = [',', ' ', ';', '\n'];
 const DEFAULT_TAG_REGEX = /(.+)/gi;
 
-class TagInput extends React.PureComponent {
+class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
   static propTypes = {
     onChange: PropTypes.func.isRequired,
-    value: PropTypes.arrayOf(tagDataPropType).isRequired,
+    value: PropTypes.array.isRequired,
+    labelExtractor: PropTypes.func.isRequired,
     separators: PropTypes.arrayOf(PropTypes.string),
     regex: PropTypes.object,
     tagColor: PropTypes.string,
@@ -110,11 +102,11 @@ class TagInput extends React.PureComponent {
     tagContainerStyle: ViewPropTypes.style,
     tagTextStyle: Text.propTypes.style,
     inputColor: PropTypes.string,
-    inputProps: PropTypes.object,
-    labelKey: PropTypes.string,
+    inputProps: PropTypes.shape(TextInput.propTypes),
     numberOfLines: PropTypes.number,
+    parseOnBlur: PropTypes.bool,
   };
-  props: Props;
+  props: Props<T>;
   state: State = {
     text: '',
     inputWidth: null,
@@ -129,10 +121,13 @@ class TagInput extends React.PureComponent {
   scrollView: ?ScrollView = null;
 
   static defaultProps = {
+    separators: DEFAULT_SEPARATORS,
+    regex: DEFAULT_TAG_REGEX,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
     numberOfLines: 2,
+    parseOnBlur: false,
   };
 
   measureWrapper = (event: { nativeEvent: { layout: { width: number } } }) => {
@@ -144,7 +139,7 @@ class TagInput extends React.PureComponent {
     this.setState({ text: text });
     const lastTyped = text.charAt(text.length - 1);
 
-    const parseWhen = this.props.separators || DEFAULT_SEPARATORS;
+    const parseWhen = this.props.separators;
 
     if (parseWhen.indexOf(lastTyped) > -1) {
       this.parseTags();
@@ -152,8 +147,11 @@ class TagInput extends React.PureComponent {
   }
 
   onBlur = (event: { nativeEvent: { text: string } }) => {
-    this.setState({ text: event.nativeEvent.text });
-    if (this.props.parseOnBlur) {
+    if (Platform.OS === "ios" && this.props.parseOnBlur) {
+      this.setState({ text: event.nativeEvent.text }, this.parseTags);
+    } else if (Platform.OS === "ios") {
+      this.setState({ text: event.nativeEvent.text });
+    } else if (this.props.parseOnBlur) {
       this.parseTags();
     }
   }
@@ -162,7 +160,7 @@ class TagInput extends React.PureComponent {
     const { text } = this.state;
     const { value } = this.props;
 
-    const regex = this.props.regex || DEFAULT_TAG_REGEX;
+    const regex = this.props.regex;
     const results = text.match(regex);
 
     if (results && results.length > 0) {
@@ -182,9 +180,8 @@ class TagInput extends React.PureComponent {
   }
 
   focus = () => {
-    if (this.tagInput) {
-      this.tagInput.focus();
-    }
+    invariant(this.tagInput, "should be set");
+    this.tagInput.focus();
   }
 
   removeIndex = (index: number) => {
@@ -213,7 +210,7 @@ class TagInput extends React.PureComponent {
     const defaultInputProps = {
       autoCapitalize: 'none',
       autoCorrect: false,
-      placeholder: 'username',
+      placeholder: 'Start typing',
       returnKeyType: 'done',
       keyboardType: 'default',
       underlineColorAndroid: 'rgba(0,0,0,0)',
@@ -228,11 +225,10 @@ class TagInput extends React.PureComponent {
     const tags = this.props.value.map((tag, index) => (
       <Tag
         index={index}
-        tag={tag}
+        label={this.props.labelExtractor(tag)}
         isLastTag={this.props.value.length === index + 1}
         onLayoutLastTag={this.onLayoutLastTag}
         removeIndex={this.removeIndex}
-        labelKey={this.props.labelKey}
         tagColor={this.props.tagColor}
         tagTextColor={this.props.tagTextColor}
         tagContainerStyle={this.props.tagContainerStyle}
@@ -244,12 +240,10 @@ class TagInput extends React.PureComponent {
     return (
       <TouchableWithoutFeedback
         onPress={this.focus}
-        style={[styles.container]}
+        style={styles.container}
         onLayout={this.measureWrapper}
       >
-        <View
-          style={[styles.wrapper, { height: wrapperHeight }]}
-        >
+        <View style={[styles.wrapper, { height: wrapperHeight }]}>
           <ScrollView
             ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
@@ -328,11 +322,10 @@ class Tag extends React.PureComponent {
 
   props: {
     index: number,
-    tag: TagData,
+    label: string,
     isLastTag: bool,
     onLayoutLastTag: (endPosOfTag: number) => void,
     removeIndex: (index: number) => void,
-    labelKey?: string,
     tagColor: string,
     tagTextColor: string,
     tagContainerStyle?: StyleObj,
@@ -340,11 +333,10 @@ class Tag extends React.PureComponent {
   };
   static propTypes = {
     index: PropTypes.number.isRequired,
-    tag: tagDataPropType.isRequired,
+    label: PropTypes.string.isRequired,
     isLastTag: PropTypes.bool.isRequired,
     onLayoutLastTag: PropTypes.func.isRequired,
     removeIndex: PropTypes.func.isRequired,
-    labelKey: PropTypes.string,
     tagColor: PropTypes.string.isRequired,
     tagTextColor: PropTypes.string.isRequired,
     tagContainerStyle: ViewPropTypes.style,
@@ -371,7 +363,7 @@ class Tag extends React.PureComponent {
           { color: this.props.tagTextColor },
           this.props.tagTextStyle,
         ]}>
-          {this.getLabelValue()}
+          {this.props.label}
           &nbsp;&times;
         </Text>
       </TouchableOpacity>
@@ -389,16 +381,6 @@ class Tag extends React.PureComponent {
     this.props.onLayoutLastTag(layout.width + layout.x);
   }
 
-  getLabelValue = () => {
-    const { tag, labelKey } = this.props;
-    if (labelKey) {
-      if (typeof tag !== "string" && labelKey in tag) {
-        return tag[labelKey];
-      }
-    }
-    return tag;
-  }
-
 }
 
 const styles = StyleSheet.create({
@@ -406,6 +388,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   wrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    marginTop: 3,
+    marginBottom: 2,
+    alignItems: 'flex-start',
   },
   tagInputContainerScroll: {
     flex: 1,
@@ -416,27 +403,26 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   textInput: {
-    fontSize: 18,
+    height: 36,
+    fontSize: 16,
     flex: .6,
+    marginBottom: 6,
     padding: 0,
-    marginTop: 3,
-    marginBottom: 0,
-    marginHorizontal: 0,
   },
   textInputContainer: {
+    height: 36,
   },
   tag: {
     justifyContent: 'center',
-    marginTop: 3,
+    marginTop: 6,
     marginRight: 3,
-    paddingVertical: 2,
-    paddingHorizontal: 6,
+    padding: 8,
+    height: 24,
     borderRadius: 2,
   },
   tagText: {
     padding: 0,
     margin: 0,
-    fontSize: 16,
   },
 });
 

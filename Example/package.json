@@ -2,8 +2,8 @@
   "name": "Example",
   "version": "0.0.1",
   "dependencies": {
-    "react": "~15.3.1",
-    "react-native": "0.37.0",
+    "react": "16.0.0-alpha.12",
+    "react-native": "0.48.2",
     "react-native-tag-input": "file:../"
   },
   "devDependencies": {
@@ -11,7 +11,8 @@
     "babel-preset-react-native": "1.9.0",
     "jest": "17.0.1",
     "jest-react-native": "17.0.1",
-    "react-test-renderer": "~15.3.1"
+    "react-test-renderer": "~15.3.1",
+    "flow-bin": "^0.51.1"
   },
   "jest": {
     "preset": "jest-react-native"
