@@ -24,16 +24,20 @@ const windowWidth = Dimensions.get('window').width;
 
 type RequiredProps<T> = {
   /**
-   * A handler to be called when array of tags change
-   * When new tags are added, they are appended as strings
+   * A handler to be called when array of tags change.
+   * When new tags are added, they are appended as strings. If you use a
+   * non-string item type, make sure to either translate the strings to your
+   * item type before passing this value on to the "value" prop, or otherwise
+   * make sure your labelExtractor can handle both your item type and strings.
    */
   onChange: (items: $ReadOnlyArray<T | string>) => void,
   /**
-   * An array of tags
+   * An array of tags, which can be any type, as long as labelExtractor below
+   * can extract a string from it.
    */
   value: $ReadOnlyArray<T>,
   /**
-   * path of the label in tags objects
+   * Function to extract string value for label from item
    */
   labelExtractor: (tagData: T) => string,
 };
@@ -59,7 +63,7 @@ type OptionalProps = {
    */
   tagContainerStyle?: StyleObj,
   /**
-   * Styling overrride for tag's text component
+   * Styling override for tag's text component
    */
   tagTextStyle?: StyleObj,
   /**
@@ -67,11 +71,11 @@ type OptionalProps = {
    */
   inputColor: string,
   /**
-   * TextInput props TextInput.propTypes
+   * Any misc. TextInput props (autofocus, placeholder, returnKeyType, etc.)
    */
   inputProps?: $PropertyType<TextInput, 'props'>,
   /**
-   * maximum number of lines of this component
+   * Maximum number of lines of the tag input
    */
   numberOfLines: number,
   /**
