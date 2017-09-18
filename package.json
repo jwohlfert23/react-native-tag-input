@@ -1,7 +1,7 @@
 {
   "name": "react-native-tag-input",
   "description": "A tag input component for react-native",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "author": "Jack Wohlfert (https://github.com/jwohlfert23)",
   "devDependencies": {
     "react": "^16.0.0-alpha.12",
