@@ -11,21 +11,24 @@ import TagInput from 'react-native-tag-input';
 
 <TagInput
   value={this.state.emails}
-  onChange={(emails) => this.onEmailChange(emails)} />
+  onChange={(emails) => this.onEmailChange(emails)}
+  labelExtractor={(email) => email}
+/>
 ```
+
 
 | Available Properties | Description |
 -----------------------|-----------------
-| onChange | (Required) A handler to be called when array of emails/tags change |
-| value | (Required) An array of tags |
-| separators | An array os characters to use as tag separators |
+| onChange | (Required) A handler to be called when array of tags change. When new tags are added, they are appended as strings. If you use a non-string item type, make sure to either translate the strings to your item type before passing this value on to the "value" prop, or otherwise make sure your labelExtractor can handle both your item type and strings. |
+| value | (Required) An array of tags, which can be any type, as long as labelExtractor below can extract a string from it. |
+| labelExtractor | (Required) Function to extract string value for label from item |
+| separators | An array of characters to use as tag separators |
 | regex | A RegExp to test tags after enter, space, or a comma is pressed |
 | tagColor | Background color of tags |
 | tagTextColor | Text color of tags |
-| tagContainerStyle | Styling override for container surrounding tag text. |
-| tagTextStyle | Styling overrride for tag's text component |
+| tagContainerStyle | Styling override for container surrounding tag text |
+| tagTextStyle | Styling override for tag's text component |
 | inputColor | Color of text input |
-| inputProps | Any misc. TextInput props (autofocus, returnKeyType, etc.) |
-| labelKey | String. Label key if tag is an object, (tag[labelKey]) |
-| numberOfLines | Number. Number of maximum lines of the tag input |
-| parseOnBlur | Boolean. If true, will check for tags on input blur |
+| inputProps | Any misc. TextInput props (autofocus, placeholder, returnKeyType, etc.) |
+| numberOfLines | Maximum number of lines of the tag input |
+| parseOnBlur | whether to treat a blur event as a separator entry (iOS-only) |

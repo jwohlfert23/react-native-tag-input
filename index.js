@@ -1,6 +1,11 @@
 // @flow
 
-import React, { Component, PropTypes } from 'react';
+import type {
+  StyleObj,
+} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
+
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   View,
   Text,
@@ -10,266 +15,201 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   ScrollView,
+  ViewPropTypes,
+  Platform,
 } from 'react-native';
+import invariant from 'invariant';
 
-const { width } = Dimensions.get('window');
+const windowWidth = Dimensions.get('window').width;
 
-type Props = {
+type RequiredProps<T> = {
   /**
-   * A handler to be called when array of tags change
+   * A handler to be called when array of tags change.
+   * When new tags are added, they are appended as strings. If you use a
+   * non-string item type, make sure to either translate the strings to your
+   * item type before passing this value on to the "value" prop, or otherwise
+   * make sure your labelExtractor can handle both your item type and strings.
    */
-    onChange: (items: Array<any>) => void,
+  onChange: (items: $ReadOnlyArray<T | string>) => void,
   /**
-   * An array of tags
+   * An array of tags, which can be any type, as long as labelExtractor below
+   * can extract a string from it.
    */
-    value: Array<any>,
+  value: $ReadOnlyArray<T>,
   /**
-   * An array os characters to use as tag separators
+   * Function to extract string value for label from item
    */
-    separators: Array<string>,
+  labelExtractor: (tagData: T) => string,
+};
+type OptionalProps = {
+  /**
+   * An array of characters to use as tag separators
+   */
+  separators: $ReadOnlyArray<string>,
   /**
    * A RegExp to test tags after enter, space, or a comma is pressed
    */
-    regex?: Object,
+  regex: RegExp,
   /**
    * Background color of tags
    */
-    tagColor?: string,
+  tagColor: string,
   /**
    * Text color of tags
    */
-    tagTextColor?: string,
+  tagTextColor: string,
   /**
    * Styling override for container surrounding tag text
    */
-    tagContainerStyle?: Object,
+  tagContainerStyle?: StyleObj,
   /**
-   * Styling overrride for tag's text component
+   * Styling override for tag's text component
    */
-    tagTextStyle?: Object,
+  tagTextStyle?: StyleObj,
   /**
    * Color of text input
    */
-    inputColor?: string,
+  inputColor: string,
   /**
-   * TextInput props Text.propTypes
+   * Any misc. TextInput props (autofocus, placeholder, returnKeyType, etc.)
    */
-    inputProps?: Object,
+  inputProps?: $PropertyType<TextInput, 'props'>,
   /**
-   * path of the label in tags objects
+   * Maximum number of lines of the tag input
    */
-    labelKey?: string,
+  numberOfLines: number,
   /**
-   *  maximum number of lines of this component
+   * whether to treat a blur event as a separator entry (iOS-only)
    */
-    numberOfLines: number,
+  parseOnBlur: bool,
 };
-
+type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
   text: string,
   inputWidth: ?number,
   lines: number,
 };
 
-type NativeEvent = {
-  target: number,
-  key: string,
-  eventCount: number,
-  text: string,
-};
-
-type Event = {
-  nativeEvent: NativeEvent,
-};
-
 const DEFAULT_SEPARATORS = [',', ' ', ';', '\n'];
-const DEFAULT_TAG_REGEX = /(.+)/gi
+const DEFAULT_TAG_REGEX = /(.+)/gi;
 
-class TagInput extends Component {
+class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
+
   static propTypes = {
     onChange: PropTypes.func.isRequired,
     value: PropTypes.array.isRequired,
+    labelExtractor: PropTypes.func.isRequired,
+    separators: PropTypes.arrayOf(PropTypes.string),
     regex: PropTypes.object,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
+    tagContainerStyle: ViewPropTypes.style,
+    tagTextStyle: Text.propTypes.style,
     inputColor: PropTypes.string,
-    inputProps: PropTypes.object,
-    labelKey: PropTypes.string,
+    inputProps: PropTypes.shape(TextInput.propTypes),
     numberOfLines: PropTypes.number,
+    parseOnBlur: PropTypes.bool,
   };
-
-  props: Props;
+  props: Props<T>;
   state: State = {
     text: '',
     inputWidth: null,
     lines: 1,
   };
-
-  wrapperWidth = width;
-
+  wrapperWidth = windowWidth;
   // scroll to bottom
-  contentHeight: 0;
-  scrollViewHeight: 0;
+  contentHeight = 0;
+  scrollViewHeight = 0;
+  // refs
+  tagInput: ?TextInput = null;
+  scrollView: ?ScrollView = null;
 
   static defaultProps = {
+    separators: DEFAULT_SEPARATORS,
+    regex: DEFAULT_TAG_REGEX,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
     numberOfLines: 2,
+    parseOnBlur: false,
   };
 
-  measureWrapper = () => {
-    if (!this.refs.wrapper)
-      return;
-
-    this.refs.wrapper.measure((ox, oy, w, /*h, px, py*/) => {
-      this.wrapperWidth = w;
-      this.setState({ inputWidth: this.wrapperWidth });
-    });
-  };
-
-  calculateWidth = () => {
-    setTimeout(() => {
-      if (!this.refs['tag' + (this.props.value.length - 1)])
-        return;
-
-      this.refs['tag' + (this.props.value.length - 1)].measure((ox, oy, w, /*h, px, py*/) => {
-        const endPosOfTag = w + ox;
-        const margin = 3;
-        const spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
-
-        const inputWidth = (spaceLeft < 100) ? this.wrapperWidth : spaceLeft - 10;
-
-        if (spaceLeft < 100) {
-          if (this.state.lines < this.props.numberOfLines) {
-            const lines = this.state.lines + 1;
-
-            this.setState({ inputWidth, lines });
-          } else {
-            this.setState({ inputWidth }, () => this.scrollToBottom());
-          }
-        } else {
-          this.setState({ inputWidth });
-        }
-      });
-    }, 0);
-  };
-
-  componentDidMount() {
-    setTimeout(() => {
-      this.calculateWidth();
-    }, 100);
+  measureWrapper = (event: { nativeEvent: { layout: { width: number } } }) => {
+    this.wrapperWidth = event.nativeEvent.layout.width;
+    this.setState({ inputWidth: this.wrapperWidth });
   }
 
-  componentDidUpdate(prevProps: Props, /*prevState*/) {
-    if (prevProps.value.length != this.props.value.length || !prevProps.value) {
-      this.calculateWidth();
-    }
-  }
-
-  onChange = (event: Event) => {
-    if (!event || !event.nativeEvent)
-      return;
-
-    const text = event.nativeEvent.text;
+  onChangeText = (text: string) => {
     this.setState({ text: text });
     const lastTyped = text.charAt(text.length - 1);
 
-    const parseWhen = this.props.separators || DEFAULT_SEPARATORS;
+    const parseWhen = this.props.separators;
 
-    if (parseWhen.indexOf(lastTyped) > -1)
+    if (parseWhen.indexOf(lastTyped) > -1) {
       this.parseTags();
-  };
+    }
+  }
 
-  onBlur = (event: Event) => {
-    if (!event || !event.nativeEvent || !this.props.parseOnBlur)
-      return;
-
-    const text = event.nativeEvent.text;
-    this.setState({ text: text });
-    this.parseTags();
-  };
+  onBlur = (event: { nativeEvent: { text: string } }) => {
+    if (Platform.OS === "ios" && this.props.parseOnBlur) {
+      this.setState({ text: event.nativeEvent.text }, this.parseTags);
+    } else if (Platform.OS === "ios") {
+      this.setState({ text: event.nativeEvent.text });
+    } else if (this.props.parseOnBlur) {
+      this.parseTags();
+    }
+  }
 
   parseTags = () => {
     const { text } = this.state;
     const { value } = this.props;
 
-    const regex = this.props.regex || DEFAULT_TAG_REGEX;
+    const regex = this.props.regex;
     const results = text.match(regex);
 
     if (results && results.length > 0) {
       this.setState({ text: '' });
       this.props.onChange([...new Set([...value, ...results])]);
     }
-  };
+  }
 
-  onKeyPress = (event: Event) => {
-    if (this.state.text === '' && event.nativeEvent && event.nativeEvent.key == 'Backspace') {
-      this.pop();
+  onKeyPress = (event: { nativeEvent: { key: string } }) => {
+    if (this.state.text !== '' || event.nativeEvent.key !== 'Backspace') {
+      return;
     }
-  };
-
-  focus = () => {
-    if (this.refs.tagInput)
-      this.refs.tagInput.focus();
-  };
-
-  pop = () => {
     const tags = [...this.props.value];
     tags.pop();
     this.props.onChange(tags);
     this.focus();
-  };
+  }
+
+  focus = () => {
+    invariant(this.tagInput, "should be set");
+    this.tagInput.focus();
+  }
 
   removeIndex = (index: number) => {
     const tags = [...this.props.value];
     tags.splice(index, 1);
     this.props.onChange(tags);
-    this.focus();
-  };
+  }
 
-  _getLabelValue = (tag) => {
-    const { labelKey } = this.props;
-
-    if (labelKey) {
-      if (labelKey in tag) {
-        return tag[labelKey];
-      }
+  scrollToBottom = () => {
+    const y = this.contentHeight - this.scrollViewHeight;
+    if (y <= 0) {
+      return;
     }
-
-    return tag;
-  };
-
-  _renderTag = (tag, index) => {
-    const { tagColor, tagTextColor } = this.props;
-
-    return (
-      <TouchableOpacity
-        key={index}
-        ref={'tag' + index}
-        style={[styles.tag, { backgroundColor: tagColor }, this.props.tagContainerStyle]}
-        onPress={() => this.removeIndex(index)}>
-        <Text style={[styles.tagText, { color: tagTextColor }, this.props.tagTextStyle]}>
-          {this._getLabelValue(tag)}&nbsp;&times;
-        </Text>
-      </TouchableOpacity>
+    const scrollView = this.scrollView;
+    invariant(
+      scrollView,
+      "this.scrollView ref should exist before scrollToBottom called",
     );
-  };
-
-
-
-  scrollToBottom = (animated: boolean = true) => {
-    if (this.contentHeight > this.scrollViewHeight) {
-      this.refs.scrollView.scrollTo({
-        y: this.contentHeight - this.scrollViewHeight,
-        animated,
-      });
-    }
-  };
+    scrollView.scrollTo({ y, animated: true });
+  }
 
   render() {
     const { text, inputWidth, lines } = this.state;
-    const { value, inputColor } = this.props;
+    const { inputColor } = this.props;
 
     const defaultInputProps = {
       autoCapitalize: 'none',
@@ -286,35 +226,52 @@ class TagInput extends Component {
 
     const width = inputWidth ? inputWidth : 400;
 
+    const tags = this.props.value.map((tag, index) => (
+      <Tag
+        index={index}
+        label={this.props.labelExtractor(tag)}
+        isLastTag={this.props.value.length === index + 1}
+        onLayoutLastTag={this.onLayoutLastTag}
+        removeIndex={this.removeIndex}
+        tagColor={this.props.tagColor}
+        tagTextColor={this.props.tagTextColor}
+        tagContainerStyle={this.props.tagContainerStyle}
+        tagTextStyle={this.props.tagTextStyle}
+        key={index}
+      />
+    ));
+
     return (
       <TouchableWithoutFeedback
-        onPress={() => this.refs.tagInput.focus()}
+        onPress={this.focus}
+        style={styles.container}
         onLayout={this.measureWrapper}
-        style={[styles.container]}>
-        <View
-          style={[styles.wrapper,{height: wrapperHeight}]}
-          ref="wrapper"
-          onLayout={this.measureWrapper}>
+      >
+        <View style={[styles.wrapper, { height: wrapperHeight }]}>
           <ScrollView
-            ref='scrollView'
+            ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
-            onContentSizeChange={(w, h) => this.contentHeight = h}
-            onLayout={ev => this.scrollViewHeight = ev.nativeEvent.layout.height}
+            onContentSizeChange={this.onScrollViewContentSizeChange}
+            onLayout={this.onScrollViewLayout}
+            keyboardShouldPersistTaps="handled"
           >
             <View style={styles.tagInputContainer}>
-              {value.map((tag, index) => this._renderTag(tag, index))}
-              <View style={[styles.textInputContainer, { width: this.state.inputWidth }]}>
+              {tags}
+              <View style={[
+                styles.textInputContainer,
+                { width: this.state.inputWidth },
+              ]}>
                 <TextInput
-                  ref="tagInput"
+                  ref={this.tagInputRef}
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
                   value={text}
                   style={[styles.textInput, {
-                  width: width,
-                  color: inputColor,
-                }]}
+                    width: width,
+                    color: inputColor,
+                  }]}
                   onBlur={this.onBlur}
-                  onChange={this.onChange}
+                  onChangeText={this.onChangeText}
                   onSubmitEditing={this.parseTags}
                   {...inputProps}
                 />
@@ -325,6 +282,109 @@ class TagInput extends Component {
       </TouchableWithoutFeedback>
     )
   }
+
+  tagInputRef = (tagInput: TextInput) => {
+    this.tagInput = tagInput;
+  }
+
+  scrollViewRef = (scrollView: ScrollView) => {
+    this.scrollView = scrollView;
+  }
+
+  onScrollViewContentSizeChange = (w: number, h: number) => {
+    this.contentHeight = h;
+  }
+
+  onScrollViewLayout = (
+    event: { nativeEvent: { layout: { height: number } } },
+  ) => {
+    this.scrollViewHeight = event.nativeEvent.layout.height;
+  }
+
+  onLayoutLastTag = (endPosOfTag: number) => {
+    const margin = 3;
+    const spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
+
+    const inputWidth = (spaceLeft < 100) ? this.wrapperWidth : spaceLeft - 10;
+
+    if (spaceLeft < 100) {
+      if (this.state.lines < this.props.numberOfLines) {
+        const lines = this.state.lines + 1;
+
+        this.setState({ inputWidth, lines });
+      } else {
+        this.setState({ inputWidth }, this.scrollToBottom);
+      }
+    } else {
+      this.setState({ inputWidth });
+    }
+  }
+
+}
+
+class Tag extends React.PureComponent {
+
+  props: {
+    index: number,
+    label: string,
+    isLastTag: bool,
+    onLayoutLastTag: (endPosOfTag: number) => void,
+    removeIndex: (index: number) => void,
+    tagColor: string,
+    tagTextColor: string,
+    tagContainerStyle?: StyleObj,
+    tagTextStyle?: StyleObj,
+  };
+  static propTypes = {
+    index: PropTypes.number.isRequired,
+    label: PropTypes.string.isRequired,
+    isLastTag: PropTypes.bool.isRequired,
+    onLayoutLastTag: PropTypes.func.isRequired,
+    removeIndex: PropTypes.func.isRequired,
+    tagColor: PropTypes.string.isRequired,
+    tagTextColor: PropTypes.string.isRequired,
+    tagContainerStyle: ViewPropTypes.style,
+    tagTextStyle: Text.propTypes.style,
+  };
+
+  render() {
+    let onLayout = undefined;
+    if (this.props.isLastTag) {
+      onLayout = this.onLayoutLastTag;
+    }
+    return (
+      <TouchableOpacity
+        onPress={this.onPress}
+        onLayout={onLayout}
+        style={[
+          styles.tag,
+          { backgroundColor: this.props.tagColor },
+          this.props.tagContainerStyle,
+        ]}
+      >
+        <Text style={[
+          styles.tagText,
+          { color: this.props.tagTextColor },
+          this.props.tagTextStyle,
+        ]}>
+          {this.props.label}
+          &nbsp;&times;
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+
+  onPress = () => {
+    this.props.removeIndex(this.props.index);
+  }
+
+  onLayoutLastTag = (
+    event: { nativeEvent: { layout: { x: number, width: number } } },
+  ) => {
+    const layout = event.nativeEvent.layout;
+    this.props.onLayoutLastTag(layout.width + layout.x);
+  }
+
 }
 
 const styles = StyleSheet.create({
@@ -352,7 +412,6 @@ const styles = StyleSheet.create({
     flex: .6,
     marginBottom: 6,
     padding: 0,
-
   },
   textInputContainer: {
     height: 36,

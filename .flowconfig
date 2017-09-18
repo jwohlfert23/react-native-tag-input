@@ -2,12 +2,8 @@
 ; We fork some components by platform
 .*/*[.]android.js
 
-; Ignore "BUCK" generated dirs
-<PROJECT_ROOT>/\.buckd/
-
 ; Ignore unexpected extra "@providesModule"
 .*/node_modules/.*/node_modules/fbjs/.*
-.*/react-native-tag-input/node_modules/fbjs/.*
 
 ; Ignore duplicate module providers
 ; For RN Apps installed via npm, "Libraries" folder is inside
@@ -15,11 +11,8 @@
 .*/Libraries/react-native/React.js
 .*/Libraries/react-native/ReactNative.js
 
-; Ignore parent directory's react-native
-.*/react-native-tag-input/node_modules/react-native/.*
-
-; Ignore any duplicate symlinked version of ourselves
-.*/node_modules/react-native-tag-input/Example/.*
+; Ignore any possible duplicates from within our Example folder
+.*/Example/node_modules/.*
 
 [include]
 

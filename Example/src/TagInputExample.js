@@ -16,6 +16,8 @@ export default class TagInputExample extends Component {
     });
   };
 
+  labelExtractor = (tag) => tag;
+
   render() {
     const inputProps = {
       keyboardType: 'default',
@@ -30,6 +32,7 @@ export default class TagInputExample extends Component {
           <TagInput
             value={this.state.tags}
             onChange={this.onChangeTags}
+            labelExtractor={this.labelExtractor}
             tagColor="blue"
             tagTextColor="white"
             inputProps={inputProps}
