@@ -321,19 +321,20 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
 }
 
+type TagProps = {
+  index: number,
+  label: string,
+  isLastTag: bool,
+  onLayoutLastTag: (endPosOfTag: number) => void,
+  removeIndex: (index: number) => void,
+  tagColor: string,
+  tagTextColor: string,
+  tagContainerStyle?: StyleObj,
+  tagTextStyle?: StyleObj,
+};
 class Tag extends React.PureComponent {
 
-  props: {
-    index: number,
-    label: string,
-    isLastTag: bool,
-    onLayoutLastTag: (endPosOfTag: number) => void,
-    removeIndex: (index: number) => void,
-    tagColor: string,
-    tagTextColor: string,
-    tagContainerStyle?: StyleObj,
-    tagTextStyle?: StyleObj,
-  };
+  props: TagProps;
   static propTypes = {
     index: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,
@@ -345,16 +346,24 @@ class Tag extends React.PureComponent {
     tagContainerStyle: ViewPropTypes.style,
     tagTextStyle: Text.propTypes.style,
   };
+  curPos: ?number = null;
+
+  componentWillReceiveProps(nextProps: TagProps) {
+    if (
+      !this.props.isLastTag &&
+      nextProps.isLastTag &&
+      this.curPos !== null &&
+      this.curPos !== undefined
+    ) {
+      this.props.onLayoutLastTag(this.curPos);
+    }
+  }
 
   render() {
-    let onLayout = undefined;
-    if (this.props.isLastTag) {
-      onLayout = this.onLayoutLastTag;
-    }
     return (
       <TouchableOpacity
         onPress={this.onPress}
-        onLayout={onLayout}
+        onLayout={this.onLayoutLastTag}
         style={[
           styles.tag,
           { backgroundColor: this.props.tagColor },
@@ -381,7 +390,10 @@ class Tag extends React.PureComponent {
     event: { nativeEvent: { layout: { x: number, width: number } } },
   ) => {
     const layout = event.nativeEvent.layout;
-    this.props.onLayoutLastTag(layout.width + layout.x);
+    this.curPos = layout.width + layout.x;
+    if (this.props.isLastTag) {
+      this.props.onLayoutLastTag(this.curPos);
+    }
   }
 
 }
