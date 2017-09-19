@@ -21,6 +21,14 @@ import {
 import invariant from 'invariant';
 
 const windowWidth = Dimensions.get('window').width;
+const defaultInputProps = {
+  autoCapitalize: 'none',
+  autoCorrect: false,
+  placeholder: 'Start typing',
+  returnKeyType: 'done',
+  keyboardType: 'default',
+  underlineColorAndroid: 'rgba(0,0,0,0)',
+};
 
 type RequiredProps<T> = {
   /**
@@ -210,15 +218,6 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   render() {
     const { text, inputWidth, lines } = this.state;
     const { inputColor } = this.props;
-
-    const defaultInputProps = {
-      autoCapitalize: 'none',
-      autoCorrect: false,
-      placeholder: 'Start typing',
-      returnKeyType: 'done',
-      keyboardType: 'default',
-      underlineColorAndroid: 'rgba(0,0,0,0)',
-    }
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
 
