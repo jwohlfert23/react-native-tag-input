@@ -87,7 +87,11 @@ type OptionalProps = {
    */
   maxHeight: number,
   /**
-   * whether to treat a blur event as a separator entry (iOS-only)
+   * Callback that gets passed the new component height when it changes
+   */
+  onHeightChange?: (height: number) => void,
+  /**
+   * Whether to treat a blur event as a separator entry (iOS-only)
    */
   parseOnBlur: bool,
 };
@@ -116,6 +120,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     inputColor: PropTypes.string,
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
+    onHeightChange: PropTypes.func,
     parseOnBlur: PropTypes.bool,
   };
   props: Props<T>;
@@ -149,6 +154,15 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     );
     if (wrapperHeight !== this.state.wrapperHeight) {
       this.setState({ wrapperHeight });
+    }
+  }
+
+  componentWillUpdate(nextProps: Props<T>, nextState: State) {
+    if (
+      this.props.onHeightChange &&
+      nextState.wrapperHeight !== this.state.wrapperHeight
+    ) {
+      this.props.onHeightChange(nextState.wrapperHeight);
     }
   }
 
