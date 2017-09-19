@@ -98,7 +98,7 @@ type OptionalProps = {
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
   text: string,
-  inputWidth: ?number,
+  inputWidth: number,
   wrapperHeight: number,
 };
 
@@ -126,10 +126,11 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   props: Props<T>;
   state: State = {
     text: '',
-    inputWidth: null,
+    inputWidth: 90,
     wrapperHeight: 36,
   };
   wrapperWidth = windowWidth;
+  spaceLeft = 0;
   // scroll to bottom
   contentHeight = 0;
   scrollViewHeight = 0;
@@ -147,6 +148,16 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     parseOnBlur: false,
   };
 
+  static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
+    if (text === "") {
+      return 90;
+    } else if (spaceLeft >= 100) {
+      return spaceLeft - 10;
+    } else {
+      return wrapperWidth;
+    }
+  }
+
   componentWillReceiveProps(nextProps: Props<T>) {
     const wrapperHeight = Math.min(
       nextProps.maxHeight,
@@ -158,6 +169,14 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   componentWillUpdate(nextProps: Props<T>, nextState: State) {
+    const inputWidth = TagInput.inputWidth(
+      nextState.text,
+      this.spaceLeft,
+      this.wrapperWidth,
+    );
+    if (inputWidth !== this.state.inputWidth) {
+      this.setState({ inputWidth });
+    }
     if (
       this.props.onHeightChange &&
       nextState.wrapperHeight !== this.state.wrapperHeight
@@ -168,7 +187,14 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
   measureWrapper = (event: { nativeEvent: { layout: { width: number } } }) => {
     this.wrapperWidth = event.nativeEvent.layout.width;
-    this.setState({ inputWidth: this.wrapperWidth });
+    const inputWidth = TagInput.inputWidth(
+      this.state.text,
+      this.spaceLeft,
+      this.wrapperWidth,
+    );
+    if (inputWidth !== this.state.inputWidth) {
+      this.setState({ inputWidth });
+    }
   }
 
   onChangeText = (text: string) => {
@@ -240,12 +266,10 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   render() {
-    const { text, inputWidth } = this.state;
+    const { text } = this.state;
     const { inputColor } = this.props;
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
-
-    const width = inputWidth ? inputWidth : 400;
 
     const tags = this.props.value.map((tag, index) => (
       <Tag
@@ -288,7 +312,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
                   onKeyPress={this.onKeyPress}
                   value={text}
                   style={[styles.textInput, {
-                    width: width,
+                    width: this.state.inputWidth,
                     color: inputColor,
                   }]}
                   onBlur={this.onBlur}
@@ -336,9 +360,15 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
   onLayoutLastTag = (endPosOfTag: number) => {
     const margin = 3;
-    const spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
-    const inputWidth = (spaceLeft < 100) ? this.wrapperWidth : spaceLeft - 10;
-    this.setState({ inputWidth });
+    this.spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
+    const inputWidth = TagInput.inputWidth(
+      this.state.text,
+      this.spaceLeft,
+      this.wrapperWidth,
+    );
+    if (inputWidth !== this.state.inputWidth) {
+      this.setState({ inputWidth });
+    }
   }
 
 }
