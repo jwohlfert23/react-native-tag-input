@@ -30,5 +30,5 @@ import TagInput from 'react-native-tag-input';
 | tagTextStyle | Styling override for tag's text component |
 | inputColor | Color of text input |
 | inputProps | Any misc. TextInput props (autofocus, placeholder, returnKeyType, etc.) |
-| numberOfLines | Maximum number of lines of the tag input |
+| maxHeight | Max height of the tag input on screen (will scroll if max height reached) |
 | parseOnBlur | whether to treat a blur event as a separator entry (iOS-only) |

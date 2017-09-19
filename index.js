@@ -83,9 +83,9 @@ type OptionalProps = {
    */
   inputProps?: $PropertyType<TextInput, 'props'>,
   /**
-   * Maximum number of lines of the tag input
+   * Max height of the tag input on screen (will scroll if max height reached)
    */
-  numberOfLines: number,
+  maxHeight: number,
   /**
    * whether to treat a blur event as a separator entry (iOS-only)
    */
@@ -95,7 +95,7 @@ type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
   text: string,
   inputWidth: ?number,
-  lines: number,
+  wrapperHeight: number,
 };
 
 const DEFAULT_SEPARATORS = [',', ' ', ';', '\n'];
@@ -115,14 +115,14 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     tagTextStyle: Text.propTypes.style,
     inputColor: PropTypes.string,
     inputProps: PropTypes.shape(TextInput.propTypes),
-    numberOfLines: PropTypes.number,
+    maxHeight: PropTypes.number,
     parseOnBlur: PropTypes.bool,
   };
   props: Props<T>;
   state: State = {
     text: '',
     inputWidth: null,
-    lines: 1,
+    wrapperHeight: 36,
   };
   wrapperWidth = windowWidth;
   // scroll to bottom
@@ -138,9 +138,19 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
-    numberOfLines: 2,
+    maxHeight: 75,
     parseOnBlur: false,
   };
+
+  componentWillReceiveProps(nextProps: Props<T>) {
+    const wrapperHeight = Math.min(
+      nextProps.maxHeight,
+      this.contentHeight,
+    );
+    if (wrapperHeight !== this.state.wrapperHeight) {
+      this.setState({ wrapperHeight });
+    }
+  }
 
   measureWrapper = (event: { nativeEvent: { layout: { width: number } } }) => {
     this.wrapperWidth = event.nativeEvent.layout.width;
@@ -216,12 +226,10 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   render() {
-    const { text, inputWidth, lines } = this.state;
+    const { text, inputWidth } = this.state;
     const { inputColor } = this.props;
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
-
-    const wrapperHeight = (lines - 1) * 40 + 36;
 
     const width = inputWidth ? inputWidth : 400;
 
@@ -246,7 +254,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
         style={styles.container}
         onLayout={this.measureWrapper}
       >
-        <View style={[styles.wrapper, { height: wrapperHeight }]}>
+        <View style={[styles.wrapper, { height: this.state.wrapperHeight }]}>
           <ScrollView
             ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
@@ -291,6 +299,18 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   onScrollViewContentSizeChange = (w: number, h: number) => {
+    if (this.contentHeight === h) {
+      return;
+    }
+    const nextWrapperHeight = Math.min(this.props.maxHeight, h);
+    if (nextWrapperHeight !== this.state.wrapperHeight) {
+      this.setState(
+        { wrapperHeight: nextWrapperHeight },
+        this.contentHeight < h ? this.scrollToBottom : undefined,
+      );
+    } else if (this.contentHeight < h) {
+      this.scrollToBottom();
+    }
     this.contentHeight = h;
   }
 
@@ -303,20 +323,8 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   onLayoutLastTag = (endPosOfTag: number) => {
     const margin = 3;
     const spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
-
     const inputWidth = (spaceLeft < 100) ? this.wrapperWidth : spaceLeft - 10;
-
-    if (spaceLeft < 100) {
-      if (this.state.lines < this.props.numberOfLines) {
-        const lines = this.state.lines + 1;
-
-        this.setState({ inputWidth, lines });
-      } else {
-        this.setState({ inputWidth }, this.scrollToBottom);
-      }
-    } else {
-      this.setState({ inputWidth });
-    }
+    this.setState({ inputWidth });
   }
 
 }
