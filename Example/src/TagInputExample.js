@@ -36,7 +36,7 @@ export default class TagInputExample extends Component {
             tagColor="blue"
             tagTextColor="white"
             inputProps={inputProps}
-            numberOfLines={2}
+            maxHeight={75}
           />
         </View>
       </View>

@@ -83,19 +83,23 @@ type OptionalProps = {
    */
   inputProps?: $PropertyType<TextInput, 'props'>,
   /**
-   * Maximum number of lines of the tag input
+   * Max height of the tag input on screen (will scroll if max height reached)
    */
-  numberOfLines: number,
+  maxHeight: number,
   /**
-   * whether to treat a blur event as a separator entry (iOS-only)
+   * Callback that gets passed the new component height when it changes
+   */
+  onHeightChange?: (height: number) => void,
+  /**
+   * Whether to treat a blur event as a separator entry (iOS-only)
    */
   parseOnBlur: bool,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
   text: string,
-  inputWidth: ?number,
-  lines: number,
+  inputWidth: number,
+  wrapperHeight: number,
 };
 
 const DEFAULT_SEPARATORS = [',', ' ', ';', '\n'];
@@ -115,16 +119,18 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     tagTextStyle: Text.propTypes.style,
     inputColor: PropTypes.string,
     inputProps: PropTypes.shape(TextInput.propTypes),
-    numberOfLines: PropTypes.number,
+    maxHeight: PropTypes.number,
+    onHeightChange: PropTypes.func,
     parseOnBlur: PropTypes.bool,
   };
   props: Props<T>;
   state: State = {
     text: '',
-    inputWidth: null,
-    lines: 1,
+    inputWidth: 90,
+    wrapperHeight: 36,
   };
   wrapperWidth = windowWidth;
+  spaceLeft = 0;
   // scroll to bottom
   contentHeight = 0;
   scrollViewHeight = 0;
@@ -138,13 +144,57 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
-    numberOfLines: 2,
+    maxHeight: 75,
     parseOnBlur: false,
   };
 
+  static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
+    if (text === "") {
+      return 90;
+    } else if (spaceLeft >= 100) {
+      return spaceLeft - 10;
+    } else {
+      return wrapperWidth;
+    }
+  }
+
+  componentWillReceiveProps(nextProps: Props<T>) {
+    const wrapperHeight = Math.min(
+      nextProps.maxHeight,
+      this.contentHeight,
+    );
+    if (wrapperHeight !== this.state.wrapperHeight) {
+      this.setState({ wrapperHeight });
+    }
+  }
+
+  componentWillUpdate(nextProps: Props<T>, nextState: State) {
+    const inputWidth = TagInput.inputWidth(
+      nextState.text,
+      this.spaceLeft,
+      this.wrapperWidth,
+    );
+    if (inputWidth !== this.state.inputWidth) {
+      this.setState({ inputWidth });
+    }
+    if (
+      this.props.onHeightChange &&
+      nextState.wrapperHeight !== this.state.wrapperHeight
+    ) {
+      this.props.onHeightChange(nextState.wrapperHeight);
+    }
+  }
+
   measureWrapper = (event: { nativeEvent: { layout: { width: number } } }) => {
     this.wrapperWidth = event.nativeEvent.layout.width;
-    this.setState({ inputWidth: this.wrapperWidth });
+    const inputWidth = TagInput.inputWidth(
+      this.state.text,
+      this.spaceLeft,
+      this.wrapperWidth,
+    );
+    if (inputWidth !== this.state.inputWidth) {
+      this.setState({ inputWidth });
+    }
   }
 
   onChangeText = (text: string) => {
@@ -216,14 +266,10 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   render() {
-    const { text, inputWidth, lines } = this.state;
+    const { text } = this.state;
     const { inputColor } = this.props;
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
-
-    const wrapperHeight = (lines - 1) * 40 + 36;
-
-    const width = inputWidth ? inputWidth : 400;
 
     const tags = this.props.value.map((tag, index) => (
       <Tag
@@ -246,7 +292,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
         style={styles.container}
         onLayout={this.measureWrapper}
       >
-        <View style={[styles.wrapper, { height: wrapperHeight }]}>
+        <View style={[styles.wrapper, { height: this.state.wrapperHeight }]}>
           <ScrollView
             ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
@@ -266,7 +312,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
                   onKeyPress={this.onKeyPress}
                   value={text}
                   style={[styles.textInput, {
-                    width: width,
+                    width: this.state.inputWidth,
                     color: inputColor,
                   }]}
                   onBlur={this.onBlur}
@@ -291,6 +337,18 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   onScrollViewContentSizeChange = (w: number, h: number) => {
+    if (this.contentHeight === h) {
+      return;
+    }
+    const nextWrapperHeight = Math.min(this.props.maxHeight, h);
+    if (nextWrapperHeight !== this.state.wrapperHeight) {
+      this.setState(
+        { wrapperHeight: nextWrapperHeight },
+        this.contentHeight < h ? this.scrollToBottom : undefined,
+      );
+    } else if (this.contentHeight < h) {
+      this.scrollToBottom();
+    }
     this.contentHeight = h;
   }
 
@@ -302,38 +360,33 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
   onLayoutLastTag = (endPosOfTag: number) => {
     const margin = 3;
-    const spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
-
-    const inputWidth = (spaceLeft < 100) ? this.wrapperWidth : spaceLeft - 10;
-
-    if (spaceLeft < 100) {
-      if (this.state.lines < this.props.numberOfLines) {
-        const lines = this.state.lines + 1;
-
-        this.setState({ inputWidth, lines });
-      } else {
-        this.setState({ inputWidth }, this.scrollToBottom);
-      }
-    } else {
+    this.spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
+    const inputWidth = TagInput.inputWidth(
+      this.state.text,
+      this.spaceLeft,
+      this.wrapperWidth,
+    );
+    if (inputWidth !== this.state.inputWidth) {
       this.setState({ inputWidth });
     }
   }
 
 }
 
+type TagProps = {
+  index: number,
+  label: string,
+  isLastTag: bool,
+  onLayoutLastTag: (endPosOfTag: number) => void,
+  removeIndex: (index: number) => void,
+  tagColor: string,
+  tagTextColor: string,
+  tagContainerStyle?: StyleObj,
+  tagTextStyle?: StyleObj,
+};
 class Tag extends React.PureComponent {
 
-  props: {
-    index: number,
-    label: string,
-    isLastTag: bool,
-    onLayoutLastTag: (endPosOfTag: number) => void,
-    removeIndex: (index: number) => void,
-    tagColor: string,
-    tagTextColor: string,
-    tagContainerStyle?: StyleObj,
-    tagTextStyle?: StyleObj,
-  };
+  props: TagProps;
   static propTypes = {
     index: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,
@@ -345,16 +398,24 @@ class Tag extends React.PureComponent {
     tagContainerStyle: ViewPropTypes.style,
     tagTextStyle: Text.propTypes.style,
   };
+  curPos: ?number = null;
+
+  componentWillReceiveProps(nextProps: TagProps) {
+    if (
+      !this.props.isLastTag &&
+      nextProps.isLastTag &&
+      this.curPos !== null &&
+      this.curPos !== undefined
+    ) {
+      this.props.onLayoutLastTag(this.curPos);
+    }
+  }
 
   render() {
-    let onLayout = undefined;
-    if (this.props.isLastTag) {
-      onLayout = this.onLayoutLastTag;
-    }
     return (
       <TouchableOpacity
         onPress={this.onPress}
-        onLayout={onLayout}
+        onLayout={this.onLayoutLastTag}
         style={[
           styles.tag,
           { backgroundColor: this.props.tagColor },
@@ -381,7 +442,10 @@ class Tag extends React.PureComponent {
     event: { nativeEvent: { layout: { x: number, width: number } } },
   ) => {
     const layout = event.nativeEvent.layout;
-    this.props.onLayoutLastTag(layout.width + layout.x);
+    this.curPos = layout.width + layout.x;
+    if (this.props.isLastTag) {
+      this.props.onLayoutLastTag(this.curPos);
+    }
   }
 
 }
