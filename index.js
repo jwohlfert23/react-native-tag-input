@@ -75,6 +75,10 @@ type OptionalProps = {
    */
   tagTextStyle?: StyleObj,
   /**
+   * Styling override for the overall container view
+   */
+  containerStyle: StyleObj,
+  /**
    * Color of text input
    */
   inputColor: string,
@@ -87,9 +91,17 @@ type OptionalProps = {
    */
   maxHeight: number,
   /**
+   * Max number of tags that can be added
+   */
+  maxTags: number,
+  /**
    * Callback that gets passed the new component height when it changes
    */
   onHeightChange?: (height: number) => void,
+  /**
+   * Disable automatic scrolling to bottom if specified
+   */
+  noAutoScroll: bool,
   /**
    * Whether to treat a blur event as a separator entry (iOS-only)
    */
@@ -253,6 +265,10 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   scrollToBottom = () => {
+    if (this.props.noAutoScroll) {
+      return;
+    }
+
     const y = this.contentHeight - this.scrollViewHeight;
     if (y <= 0) {
       return;
@@ -300,27 +316,30 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
             onLayout={this.onScrollViewLayout}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.tagInputContainer}>
+            <View style={[styles.tagInputContainer, this.props.containerStyle]}>
               {tags}
-              <View style={[
-                styles.textInputContainer,
-                { width: this.state.inputWidth },
-              ]}>
-                <TextInput
-                  ref={this.tagInputRef}
-                  blurOnSubmit={false}
-                  onKeyPress={this.onKeyPress}
-                  value={text}
-                  style={[styles.textInput, {
-                    width: this.state.inputWidth,
-                    color: inputColor,
-                  }]}
-                  onBlur={this.onBlur}
-                  onChangeText={this.onChangeText}
-                  onSubmitEditing={this.parseTags}
-                  {...inputProps}
-                />
-              </View>
+              {
+                (this.props.maxTags && this.props.value.length < this.props.maxTags) &&
+                  <View style={[
+                    styles.textInputContainer,
+                    { width: this.state.inputWidth },
+                  ]}>
+                    <TextInput
+                      ref={this.tagInputRef}
+                      blurOnSubmit={false}
+                      onKeyPress={this.onKeyPress}
+                      value={text}
+                      style={[styles.textInput, {
+                        width: this.state.inputWidth,
+                        color: inputColor,
+                      }]}
+                      onBlur={this.onBlur}
+                      onChangeText={this.onChangeText}
+                      onSubmitEditing={this.parseTags}
+                      {...inputProps}
+                    />
+                  </View>
+                }
             </View>
           </ScrollView>
         </View>
