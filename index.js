@@ -91,6 +91,10 @@ type OptionalProps = {
    */
   maxHeight: number,
   /**
+   * Max number of tags that can be added
+   */
+  maxTags: number,
+  /**
    * Callback that gets passed the new component height when it changes
    */
   onHeightChange?: (height: number) => void,
@@ -306,25 +310,28 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
           >
             <View style={[styles.tagInputContainer, this.props.containerStyle]}>
               {tags}
-              <View style={[
-                styles.textInputContainer,
-                { width: this.state.inputWidth },
-              ]}>
-                <TextInput
-                  ref={this.tagInputRef}
-                  blurOnSubmit={false}
-                  onKeyPress={this.onKeyPress}
-                  value={text}
-                  style={[styles.textInput, {
-                    width: this.state.inputWidth,
-                    color: inputColor,
-                  }]}
-                  onBlur={this.onBlur}
-                  onChangeText={this.onChangeText}
-                  onSubmitEditing={this.parseTags}
-                  {...inputProps}
-                />
-              </View>
+              {
+                (this.props.maxTags && this.props.value.length < this.props.maxTags) &&
+                  <View style={[
+                    styles.textInputContainer,
+                    { width: this.state.inputWidth },
+                  ]}>
+                    <TextInput
+                      ref={this.tagInputRef}
+                      blurOnSubmit={false}
+                      onKeyPress={this.onKeyPress}
+                      value={text}
+                      style={[styles.textInput, {
+                        width: this.state.inputWidth,
+                        color: inputColor,
+                      }]}
+                      onBlur={this.onBlur}
+                      onChangeText={this.onChangeText}
+                      onSubmitEditing={this.parseTags}
+                      {...inputProps}
+                    />
+                  </View>
+                }
             </View>
           </ScrollView>
         </View>
