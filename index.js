@@ -99,6 +99,10 @@ type OptionalProps = {
    */
   onHeightChange?: (height: number) => void,
   /**
+   * Disable automatic scrolling to bottom if specified
+   */
+  noAutoScroll: bool,
+  /**
    * Whether to treat a blur event as a separator entry (iOS-only)
    */
   parseOnBlur: bool,
@@ -261,6 +265,10 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   scrollToBottom = () => {
+    if (this.props.noAutoScroll) {
+      return;
+    }
+
     const y = this.contentHeight - this.scrollViewHeight;
     if (y <= 0) {
       return;
