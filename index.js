@@ -75,6 +75,10 @@ type OptionalProps = {
    */
   tagTextStyle?: StyleObj,
   /**
+   * Styling override for the overall container view
+   */
+  containerStyle: StyleObj,
+  /**
    * Color of text input
    */
   inputColor: string,
@@ -300,7 +304,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
             onLayout={this.onScrollViewLayout}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.tagInputContainer}>
+            <View style={[styles.tagInputContainer, this.props.containerStyle]}>
               {tags}
               <View style={[
                 styles.textInputContainer,
