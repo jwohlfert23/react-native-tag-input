@@ -122,6 +122,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
     parseOnBlur: PropTypes.bool,
+    parseOnSubmit: PropTypes.bool,
   };
   props: Props<T>;
   state: State = {
@@ -146,6 +147,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     inputColor: '#777777',
     maxHeight: 75,
     parseOnBlur: false,
+    parseOnSubmit: true,
   };
 
   static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
@@ -218,8 +220,28 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     }
   }
 
+  onSubmitEditing = () => {
+    if (this.props.parseOnSubmit) {
+      this.parseTags();
+    }
+  }
+
   parseTags = () => {
     const { text } = this.state;
+    const { value } = this.props;
+
+    const regex = this.props.regex;
+    const results = text.match(regex);
+
+    if (results && results.length > 0) {
+      this.setState({ text: '' });
+      this.props.onChange([...new Set([...value, ...results])]);
+    }
+  }
+
+  // Public useful
+  addNewTag = (newTag) => {
+    const text = this.props.labelExtractor(newTag);
     const { value } = this.props;
 
     const regex = this.props.regex;
@@ -317,7 +339,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
                   }]}
                   onBlur={this.onBlur}
                   onChangeText={this.onChangeText}
-                  onSubmitEditing={this.parseTags}
+                  onSubmitEditing={this.onSubmitEditing}
                   {...inputProps}
                 />
               </View>
