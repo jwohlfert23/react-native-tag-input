@@ -40,4 +40,4 @@ import TagInput from 'react-native-tag-input';
 
 | Public Useful Method | Description |
 -----------------------|-----------------
-| addNewTag | Replace pending input with suggested custom tag |
+| addCustomTag | Replace pending input with suggested custom tag |

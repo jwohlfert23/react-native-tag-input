@@ -258,16 +258,12 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   // Public useful
-  addNewTag = (newTag) => {
-    const text = this.props.labelExtractor(newTag);
+  addCustomTag = (newTag) => {
     const { value } = this.props;
 
-    const regex = this.props.regex;
-    const results = text.match(regex);
-
-    if (results && results.length > 0) {
+    if (newTag) {
       this.setState({ text: '' });
-      this.onChangeTags([...new Set([...value, ...results])]);
+      this.onChangeTags([...new Set([...value, newTag])]);
     }
   }
 

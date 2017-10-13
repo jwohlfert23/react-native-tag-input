@@ -31,8 +31,8 @@ export default class TagInputExample extends Component {
     this.refs.horizontalTagInput.parseTags();
   }
 
-  onAddNewTag = () => {
-    this.refs.horizontalTagInput.addNewTag('Suggested Tag');
+  onaddCustomTag = () => {
+    this.refs.horizontalTagInput.addCustomTag('Suggested Tag');
   }
 
   render() {
@@ -92,7 +92,7 @@ export default class TagInputExample extends Component {
         </View>
         <View style={{marginVertical: 10, backgroundColor: Platform.OS == 'ios' ? '#841584' : 'transparent'}}>
           <Button
-            onPress={this.onAddNewTag}
+            onPress={this.onaddCustomTag}
             title="Replace input to suggested tag"
             color={Platform.OS == 'ios' ? 'white' : '#841584'}
           />
