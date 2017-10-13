@@ -126,6 +126,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     onHeightChange: PropTypes.func,
     parseOnBlur: PropTypes.bool,
     parseOnSubmit: PropTypes.bool,
+    onChangeText: PropTypes.func,
     scrollHorizontal: PropTypes.bool,
     scrollViewProps: PropTypes.shape(TextInput.propTypes),
   };
@@ -153,6 +154,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     maxHeight: 75,
     parseOnBlur: false,
     parseOnSubmit: true,
+    onChangeText: () => {},
     scrollHorizontal: false,
   };
 
@@ -206,6 +208,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   onChangeText = (text: string) => {
+    this.props.onChangeText();
     this.setState({ text: text });
     const lastTyped = text.charAt(text.length - 1);
 

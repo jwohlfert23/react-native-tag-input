@@ -34,6 +34,7 @@ import TagInput from 'react-native-tag-input';
 | onHeightChange | Callback that gets passed the new component height when it changes |
 | parseOnBlur | Whether to treat a blur event as a separator entry (iOS-only) |
 | parseOnSubmit | Whether to treat submit button press as a separator entry |
+| onChangeText | A handler to be called when input text has changed |
 | scrollHorizontal | Whether the wrapper scrollView should scroll horizontally |
 | scrollViewProps | Any misc. ScrollView props (showsHorizontalScrollIndicator, etc.) |
 
