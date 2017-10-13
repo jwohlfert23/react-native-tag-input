@@ -29,6 +29,9 @@ const defaultInputProps = {
   keyboardType: 'default',
   underlineColorAndroid: 'rgba(0,0,0,0)',
 };
+const defaultScrollViewProps = {
+  showsHorizontalScrollIndicator: false,
+};
 
 type RequiredProps<T> = {
   /**
@@ -123,6 +126,8 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     onHeightChange: PropTypes.func,
     parseOnBlur: PropTypes.bool,
     parseOnSubmit: PropTypes.bool,
+    scrollHorizontal: PropTypes.bool,
+    scrollViewProps: PropTypes.shape(TextInput.propTypes),
   };
   props: Props<T>;
   state: State = {
@@ -148,6 +153,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     maxHeight: 75,
     parseOnBlur: false,
     parseOnSubmit: true,
+    scrollHorizontal: false,
   };
 
   static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
@@ -226,6 +232,15 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     }
   }
 
+  onChangeTags = (tags, shouldScrollIfHorizontal = true) => {
+    this.props.onChange(tags);
+    if (this.props.scrollHorizontal && shouldScrollIfHorizontal) {
+      setTimeout(() => {
+        this.scrollView.scrollToEnd({ animated: true });
+      }, 0);
+    }
+  }
+
   parseTags = () => {
     const { text } = this.state;
     const { value } = this.props;
@@ -235,7 +250,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
     if (results && results.length > 0) {
       this.setState({ text: '' });
-      this.props.onChange([...new Set([...value, ...results])]);
+      this.onChangeTags([...new Set([...value, ...results])]);
     }
   }
 
@@ -249,7 +264,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
     if (results && results.length > 0) {
       this.setState({ text: '' });
-      this.props.onChange([...new Set([...value, ...results])]);
+      this.onChangeTags([...new Set([...value, ...results])]);
     }
   }
 
@@ -259,7 +274,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     }
     const tags = [...this.props.value];
     tags.pop();
-    this.props.onChange(tags);
+    this.onChangeTags(tags);
     this.focus();
   }
 
@@ -271,7 +286,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   removeIndex = (index: number) => {
     const tags = [...this.props.value];
     tags.splice(index, 1);
-    this.props.onChange(tags);
+    this.onChangeTags(tags, false);
   }
 
   scrollToBottom = () => {
@@ -292,6 +307,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     const { inputColor } = this.props;
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
+    const scrollViewProps = { ...defaultScrollViewProps, ...this.props.scrollViewProps };
 
     const tags = this.props.value.map((tag, index) => (
       <Tag
@@ -316,11 +332,13 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
       >
         <View style={[styles.wrapper, { height: this.state.wrapperHeight }]}>
           <ScrollView
+            horizontal={this.props.scrollHorizontal}
             ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
             onContentSizeChange={this.onScrollViewContentSizeChange}
             onLayout={this.onScrollViewLayout}
             keyboardShouldPersistTaps="handled"
+            {...scrollViewProps}
           >
             <View style={styles.tagInputContainer}>
               {tags}
