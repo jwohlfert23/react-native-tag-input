@@ -29,6 +29,9 @@ const defaultInputProps = {
   keyboardType: 'default',
   underlineColorAndroid: 'rgba(0,0,0,0)',
 };
+const defaultScrollViewProps = {
+  showsHorizontalScrollIndicator: false,
+};
 
 type RequiredProps<T> = {
   /**
@@ -122,6 +125,11 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
     parseOnBlur: PropTypes.bool,
+    parseOnSubmit: PropTypes.bool,
+    onChangeText: PropTypes.func,
+    clearTextWhenRemoveTag: PropTypes.bool,
+    scrollHorizontal: PropTypes.bool,
+    scrollViewProps: PropTypes.shape(TextInput.propTypes),
   };
   props: Props<T>;
   state: State = {
@@ -146,6 +154,10 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     inputColor: '#777777',
     maxHeight: 75,
     parseOnBlur: false,
+    parseOnSubmit: true,
+    onChangeText: () => {},
+    clearTextWhenRemoveTag: false,
+    scrollHorizontal: false,
   };
 
   static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
@@ -198,6 +210,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   }
 
   onChangeText = (text: string) => {
+    this.props.onChangeText();
     this.setState({ text: text });
     const lastTyped = text.charAt(text.length - 1);
 
@@ -218,6 +231,21 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     }
   }
 
+  onSubmitEditing = () => {
+    if (this.props.parseOnSubmit) {
+      this.parseTags();
+    }
+  }
+
+  onChangeTags = (tags, shouldScrollIfHorizontal = true) => {
+    this.props.onChange(tags);
+    if (this.props.scrollHorizontal && shouldScrollIfHorizontal) {
+      setTimeout(() => {
+        this.scrollView.scrollToEnd({ animated: true });
+      }, 0);
+    }
+  }
+
   parseTags = () => {
     const { text } = this.state;
     const { value } = this.props;
@@ -227,7 +255,17 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
 
     if (results && results.length > 0) {
       this.setState({ text: '' });
-      this.props.onChange([...new Set([...value, ...results])]);
+      this.onChangeTags([...new Set([...value, ...results])]);
+    }
+  }
+
+  // Public useful
+  addCustomTag = (newTag) => {
+    const { value } = this.props;
+
+    if (newTag) {
+      this.setState({ text: '' });
+      this.onChangeTags([...new Set([...value, newTag])]);
     }
   }
 
@@ -237,7 +275,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     }
     const tags = [...this.props.value];
     tags.pop();
-    this.props.onChange(tags);
+    this.onChangeTags(tags);
     this.focus();
   }
 
@@ -249,7 +287,10 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   removeIndex = (index: number) => {
     const tags = [...this.props.value];
     tags.splice(index, 1);
-    this.props.onChange(tags);
+    if (this.props.clearTextWhenRemoveTag) {
+      this.setState({ text: '' });
+    }
+    this.onChangeTags(tags, false);
   }
 
   scrollToBottom = () => {
@@ -270,6 +311,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     const { inputColor } = this.props;
 
     const inputProps = { ...defaultInputProps, ...this.props.inputProps };
+    const scrollViewProps = { ...defaultScrollViewProps, ...this.props.scrollViewProps };
 
     const tags = this.props.value.map((tag, index) => (
       <Tag
@@ -294,11 +336,13 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
       >
         <View style={[styles.wrapper, { height: this.state.wrapperHeight }]}>
           <ScrollView
+            horizontal={this.props.scrollHorizontal}
             ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
             onContentSizeChange={this.onScrollViewContentSizeChange}
             onLayout={this.onScrollViewLayout}
             keyboardShouldPersistTaps="handled"
+            {...scrollViewProps}
           >
             <View style={styles.tagInputContainer}>
               {tags}
@@ -317,7 +361,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
                   }]}
                   onBlur={this.onBlur}
                   onChangeText={this.onChangeText}
-                  onSubmitEditing={this.parseTags}
+                  onSubmitEditing={this.onSubmitEditing}
                   {...inputProps}
                 />
               </View>
