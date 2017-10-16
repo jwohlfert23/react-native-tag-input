@@ -46,6 +46,10 @@ export default class TagInputExample extends Component {
       keyboardType: 'default',
       placeholder: 'Search',
       returnKeyType: 'search',
+      style: {
+        fontSize: 14,
+        marginVertical: 10,
+      },
     };
 
     return (
@@ -79,6 +83,7 @@ export default class TagInputExample extends Component {
             maxHeight={75}
             separators={[]}
             parseOnSubmit={false}
+            clearTextWhenRemoveTag
             scrollHorizontal
           />
         </View>

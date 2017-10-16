@@ -35,6 +35,7 @@ import TagInput from 'react-native-tag-input';
 | parseOnBlur | Whether to treat a blur event as a separator entry (iOS-only) |
 | parseOnSubmit | Whether to treat submit button press as a separator entry |
 | onChangeText | A handler to be called when input text has changed |
+| clearTextWhenRemoveTag | Whether to clear pending input when remove a tag |
 | scrollHorizontal | Whether the wrapper scrollView should scroll horizontally |
 | scrollViewProps | Any misc. ScrollView props (showsHorizontalScrollIndicator, etc.) |
 

@@ -127,6 +127,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     parseOnBlur: PropTypes.bool,
     parseOnSubmit: PropTypes.bool,
     onChangeText: PropTypes.func,
+    clearTextWhenRemoveTag: PropTypes.bool,
     scrollHorizontal: PropTypes.bool,
     scrollViewProps: PropTypes.shape(TextInput.propTypes),
   };
@@ -155,6 +156,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     parseOnBlur: false,
     parseOnSubmit: true,
     onChangeText: () => {},
+    clearTextWhenRemoveTag: false,
     scrollHorizontal: false,
   };
 
@@ -285,6 +287,9 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
   removeIndex = (index: number) => {
     const tags = [...this.props.value];
     tags.splice(index, 1);
+    if (this.props.clearTextWhenRemoveTag) {
+      this.setState({ text: '' });
+    }
     this.onChangeTags(tags, false);
   }
 
