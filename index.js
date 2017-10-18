@@ -24,32 +24,32 @@ const windowWidth = Dimensions.get('window').width;
 
 type RequiredProps<T> = {
   /**
-   * A handler to be called when array of tags change.
-   * When new tags are added, they are appended as strings. If you use a
-   * non-string item type, make sure to either translate the strings to your
-   * item type before passing this value on to the "value" prop, or otherwise
-   * make sure your labelExtractor can handle both your item type and strings.
-   */
-  onChange: (items: $ReadOnlyArray<T | string>) => void,
-  /**
    * An array of tags, which can be any type, as long as labelExtractor below
-   * can extract a string from it.
+   * can extract a string from it
    */
   value: $ReadOnlyArray<T>,
+  /**
+   * A handler to be called when array of tags change. The parent should update
+   * the value prop when this is called if they want to enable removal of tags
+   */
+  onChange: (items: $ReadOnlyArray<T>) => void,
   /**
    * Function to extract string value for label from item
    */
   labelExtractor: (tagData: T) => string,
+  /**
+   * The text currently being displayed in the TextInput following the list of
+   * tags
+   */
+  text: string,
+  /**
+   * This callback gets called when the user in the TextInput. The parent should
+   * update the text prop when this is called if they want to enable input. This
+   * is also where any parsing to detect new tags should occur
+   */
+  onChangeText: (text: string) => void,
 };
 type OptionalProps = {
-  /**
-   * An array of characters to use as tag separators
-   */
-  separators: $ReadOnlyArray<string>,
-  /**
-   * A RegExp to test tags after enter, space, or a comma is pressed
-   */
-  regex: RegExp,
   /**
    * Background color of tags
    */
@@ -82,29 +82,21 @@ type OptionalProps = {
    * Callback that gets passed the new component height when it changes
    */
   onHeightChange?: (height: number) => void,
-  /**
-   * Whether to treat a blur event as a separator entry (iOS-only)
-   */
-  parseOnBlur: bool,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
-  text: string,
   inputWidth: number,
   wrapperHeight: number,
 };
 
-const DEFAULT_SEPARATORS = [',', ' ', ';', '\n'];
-const DEFAULT_TAG_REGEX = /(.+)/gi;
-
 class TagInput<T> extends React.PureComponent<Props<T>, State> {
 
   static propTypes = {
-    onChange: PropTypes.func.isRequired,
     value: PropTypes.array.isRequired,
+    onChange: PropTypes.func.isRequired,
     labelExtractor: PropTypes.func.isRequired,
-    separators: PropTypes.arrayOf(PropTypes.string),
-    regex: PropTypes.object,
+    text: PropTypes.string.isRequired,
+    onChangeText: PropTypes.func.isRequired,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
     tagContainerStyle: ViewPropTypes.style,
@@ -114,11 +106,9 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
-    parseOnBlur: PropTypes.bool,
   };
   props: Props<T>;
   state: State = {
-    text: '',
     inputWidth: 90,
     wrapperHeight: 36,
   };
@@ -132,13 +122,10 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   scrollView: ?ScrollView = null;
 
   static defaultProps = {
-    separators: DEFAULT_SEPARATORS,
-    regex: DEFAULT_TAG_REGEX,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputColor: '#777777',
     maxHeight: 75,
-    parseOnBlur: false,
   };
 
   static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
@@ -152,6 +139,14 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   }
 
   componentWillReceiveProps(nextProps: Props<T>) {
+    const inputWidth = TagInput.inputWidth(
+      nextProps.text,
+      this.spaceLeft,
+      this.wrapperWidth,
+    );
+    if (inputWidth !== this.state.inputWidth) {
+      this.setState({ inputWidth });
+    }
     const wrapperHeight = Math.min(
       nextProps.maxHeight,
       this.contentHeight,
@@ -162,14 +157,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   }
 
   componentWillUpdate(nextProps: Props<T>, nextState: State) {
-    const inputWidth = TagInput.inputWidth(
-      nextState.text,
-      this.spaceLeft,
-      this.wrapperWidth,
-    );
-    if (inputWidth !== this.state.inputWidth) {
-      this.setState({ inputWidth });
-    }
     if (
       this.props.onHeightChange &&
       nextState.wrapperHeight !== this.state.wrapperHeight
@@ -181,7 +168,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   measureWrapper = (event: { nativeEvent: { layout: { width: number } } }) => {
     this.wrapperWidth = event.nativeEvent.layout.width;
     const inputWidth = TagInput.inputWidth(
-      this.state.text,
+      this.props.text,
       this.spaceLeft,
       this.wrapperWidth,
     );
@@ -190,42 +177,13 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
-  onChangeText = (text: string) => {
-    this.setState({ text: text });
-    const lastTyped = text.charAt(text.length - 1);
-
-    const parseWhen = this.props.separators;
-
-    if (parseWhen.indexOf(lastTyped) > -1) {
-      this.parseTags();
-    }
-  }
-
   onBlur = (event: { nativeEvent: { text: string } }) => {
-    if (Platform.OS === "ios" && this.props.parseOnBlur) {
-      this.setState({ text: event.nativeEvent.text }, this.parseTags);
-    } else if (Platform.OS === "ios") {
-      this.setState({ text: event.nativeEvent.text });
-    } else if (this.props.parseOnBlur) {
-      this.parseTags();
-    }
-  }
-
-  parseTags = () => {
-    const { text } = this.state;
-    const { value } = this.props;
-
-    const regex = this.props.regex;
-    const results = text.match(regex);
-
-    if (results && results.length > 0) {
-      this.setState({ text: '' });
-      this.props.onChange([...new Set([...value, ...results])]);
-    }
+    invariant(Platform.OS === "ios", "only iOS gets text on TextInput.onBlur");
+    this.props.onChangeText(event.nativeEvent.text);
   }
 
   onKeyPress = (event: { nativeEvent: { key: string } }) => {
-    if (this.state.text !== '' || event.nativeEvent.key !== 'Backspace') {
+    if (this.props.text !== '' || event.nativeEvent.key !== 'Backspace') {
       return;
     }
     const tags = [...this.props.value];
@@ -259,9 +217,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   }
 
   render() {
-    const { text } = this.state;
-    const { inputColor } = this.props;
-
     const tags = this.props.value.map((tag, index) => (
       <Tag
         index={index}
@@ -301,14 +256,13 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
                   ref={this.tagInputRef}
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
-                  value={text}
+                  value={this.props.text}
                   style={[styles.textInput, {
                     width: this.state.inputWidth,
-                    color: inputColor,
+                    color: this.props.inputColor,
                   }]}
-                  onBlur={this.onBlur}
-                  onChangeText={this.onChangeText}
-                  onSubmitEditing={this.parseTags}
+                  onBlur={Platform.OS === "ios" ? this.onBlur : undefined}
+                  onChangeText={this.props.onChangeText}
                   autoCapitalize="none"
                   autoCorrect={false}
                   placeholder="Start typing"
@@ -361,7 +315,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     const margin = 3;
     this.spaceLeft = this.wrapperWidth - endPosOfTag - margin - 10;
     const inputWidth = TagInput.inputWidth(
-      this.state.text,
+      this.props.text,
       this.spaceLeft,
       this.wrapperWidth,
     );
@@ -493,5 +447,3 @@ const styles = StyleSheet.create({
 });
 
 export default TagInput;
-
-export { DEFAULT_SEPARATORS, DEFAULT_TAG_REGEX }

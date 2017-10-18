@@ -11,19 +11,21 @@ import TagInput from 'react-native-tag-input';
 
 <TagInput
   value={this.state.emails}
-  onChange={(emails) => this.onEmailChange(emails)}
+  onChange={(emails) => this.setState({ emails })}
   labelExtractor={(email) => email}
+  text={this.state.text}
+  onChangeText={(text) => this.setState({ text })}
 />
 ```
 
 
 | Available Properties | Description |
 -----------------------|-----------------
-| onChange | (Required) A handler to be called when array of tags change. When new tags are added, they are appended as strings. If you use a non-string item type, make sure to either translate the strings to your item type before passing this value on to the "value" prop, or otherwise make sure your labelExtractor can handle both your item type and strings. |
-| value | (Required) An array of tags, which can be any type, as long as labelExtractor below can extract a string from it. |
+| value | (Required) An array of tags, which can be any type, as long as labelExtractor below can extract a string from it |
+| onChange | (Required) A handler to be called when array of tags change. The parent should update the value prop when this is called if they want to enable removal of tags |
 | labelExtractor | (Required) Function to extract string value for label from item |
-| separators | An array of characters to use as tag separators |
-| regex | A RegExp to test tags after enter, space, or a comma is pressed |
+| text | (Required) The text currently being displayed in the TextInput following the list of tags |
+| onChangeText | (Required) This callback gets called when the user in the TextInput. The parent should update the text prop when this is called if they want to enable input. This is also where any parsing to detect new tags should occur |
 | tagColor | Background color of tags |
 | tagTextColor | Text color of tags |
 | tagContainerStyle | Styling override for container surrounding tag text |
@@ -32,4 +34,3 @@ import TagInput from 'react-native-tag-input';
 | inputProps | Any misc. TextInput props (autoFocus, placeholder, returnKeyType, etc.) |
 | maxHeight | Max height of the tag input on screen (will scroll if max height reached) |
 | onHeightChange | Callback that gets passed the new component height when it changes |
-| parseOnBlur | Whether to treat a blur event as a separator entry (iOS-only) |
