@@ -19,11 +19,21 @@ export default class TagInputExample extends Component {
 
   onChangeTags = (tags) => {
     this.setState({ tags });
-  };
+  }
 
   onChangeText = (text) => {
     this.setState({ text });
-  };
+
+    const lastTyped = text.charAt(text.length - 1);
+    const parseWhen = [',', ' ', ';', '\n'];
+
+    if (parseWhen.indexOf(lastTyped) > -1) {
+      this.setState({
+        tags: [...this.state.tags, this.state.text],
+        text: "",
+      });
+    }
+  }
 
   labelExtractor = (tag) => tag;
 
