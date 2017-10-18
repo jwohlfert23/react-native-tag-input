@@ -4,7 +4,7 @@ import type {
   StyleObj,
 } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 
-import React from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import {
   View,
@@ -105,7 +105,7 @@ type State = {
 const DEFAULT_SEPARATORS = [',', ' ', ';', '\n'];
 const DEFAULT_TAG_REGEX = /(.+)/gi;
 
-class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
+class TagInput<T> extends React.PureComponent<Props<T>, State> {
 
   static propTypes = {
     onChange: PropTypes.func.isRequired,
@@ -118,6 +118,7 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     tagContainerStyle: ViewPropTypes.style,
     tagTextStyle: Text.propTypes.style,
     inputColor: PropTypes.string,
+    // $FlowFixMe(>=0.49.0): https://github.com/facebook/react-native/pull/16437
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
@@ -328,11 +329,13 @@ class TagInput<T> extends React.PureComponent<OptionalProps, Props<T>, State> {
     )
   }
 
-  tagInputRef = (tagInput: TextInput) => {
+  tagInputRef = (tagInput: ?React.ElementRef<typeof TextInput>) => {
+    invariant(typeof tagInput === "object", "TextInput ref is object");
     this.tagInput = tagInput;
   }
 
-  scrollViewRef = (scrollView: ScrollView) => {
+  scrollViewRef = (scrollView: ?React.ElementRef<typeof ScrollView>) => {
+    invariant(typeof scrollView === "object", "ScrollView ref is object");
     this.scrollView = scrollView;
   }
 
@@ -384,7 +387,7 @@ type TagProps = {
   tagContainerStyle?: StyleObj,
   tagTextStyle?: StyleObj,
 };
-class Tag extends React.PureComponent {
+class Tag extends React.PureComponent<TagProps> {
 
   props: TagProps;
   static propTypes = {
