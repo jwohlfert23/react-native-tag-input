@@ -33,3 +33,4 @@ import TagInput from 'react-native-tag-input';
 | maxHeight | Max height of the tag input on screen (will scroll if max height reached) |
 | onHeightChange | Callback that gets passed the new component height when it changes |
 | parseOnBlur | Whether to treat a blur event as a separator entry (iOS-only) |
+| clearTextWhenRemoveTag | Whether to clear pending input when remove a tag |
