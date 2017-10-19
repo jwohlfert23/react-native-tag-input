@@ -113,10 +113,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     onHeightChange: PropTypes.func,
   };
   props: Props<T>;
-  state: State = {
-    inputWidth: this.props.inputDefaultWidth,
-    wrapperHeight: 36,
-  };
+  state: State;
   wrapperWidth = windowWidth;
   spaceLeft = 0;
   // scroll to bottom
@@ -146,6 +143,14 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
       return spaceLeft - 10;
     } else {
       return wrapperWidth;
+    }
+  }
+
+  constructor(props: Props<T>) {
+    super(props);
+    this.state = {
+      inputWidth: props.inputDefaultWidth,
+      wrapperHeight: 36,
     }
   }
 
