@@ -86,6 +86,10 @@ type OptionalProps = {
    * Whether to treat a blur event as a separator entry (iOS-only)
    */
   parseOnBlur: bool,
+  /**
+   * Whether to clear pending input when remove a tag
+   */
+  clearTextWhenRemoveTag: PropTypes.bool,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -115,6 +119,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
     parseOnBlur: PropTypes.bool,
+    clearTextWhenRemoveTag: PropTypes.bool,
   };
   props: Props<T>;
   state: State = {
@@ -139,6 +144,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputColor: '#777777',
     maxHeight: 75,
     parseOnBlur: false,
+    clearTextWhenRemoveTag: false,
   };
 
   static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
@@ -242,6 +248,9 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   removeIndex = (index: number) => {
     const tags = [...this.props.value];
     tags.splice(index, 1);
+    if (this.props.clearTextWhenRemoveTag) {
+      this.setState({ text: '' });
+    }
     this.props.onChange(tags);
   }
 
