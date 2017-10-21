@@ -25,7 +25,7 @@ import TagInput from 'react-native-tag-input';
 | onChange | (Required) A handler to be called when array of tags change. The parent should update the value prop when this is called if they want to enable removal of tags |
 | labelExtractor | (Required) Function to extract string value for label from item |
 | text | (Required) The text currently being displayed in the TextInput following the list of tags |
-| onChangeText | (Required) This callback gets called when the user in the TextInput. The parent should update the text prop when this is called if they want to enable input. This is also where any parsing to detect new tags should occur |
+| onChangeText | (Required) This callback gets called when the user types in the TextInput. The parent should update the text prop when this is called if they want to enable input. This is also where any parsing to detect new tags should occur |
 | tagColor | Background color of tags |
 | tagTextColor | Text color of tags |
 | tagContainerStyle | Styling override for container surrounding tag text |

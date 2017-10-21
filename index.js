@@ -43,9 +43,9 @@ type RequiredProps<T> = {
    */
   text: string,
   /**
-   * This callback gets called when the user in the TextInput. The parent should
-   * update the text prop when this is called if they want to enable input. This
-   * is also where any parsing to detect new tags should occur
+   * This callback gets called when the user types in the TextInput. The parent
+   * should update the text prop when this is called if they want to enable
+   * input. This is also where any parsing to detect new tags should occur
    */
   onChangeText: (text: string) => void,
 };
