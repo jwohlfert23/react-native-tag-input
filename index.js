@@ -67,6 +67,10 @@ type OptionalProps = {
    */
   tagTextStyle?: StyleObj,
   /**
+   * Width override for text input's default width when it's empty and showing placeholder
+   */
+  inputDefaultWidth: number,
+  /**
    * Color of text input
    */
   inputColor: string,
@@ -101,6 +105,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     tagTextColor: PropTypes.string,
     tagContainerStyle: ViewPropTypes.style,
     tagTextStyle: Text.propTypes.style,
+    inputDefaultWidth: PropTypes.number,
     inputColor: PropTypes.string,
     // $FlowFixMe(>=0.49.0): https://github.com/facebook/react-native/pull/16437
     inputProps: PropTypes.shape(TextInput.propTypes),
@@ -108,10 +113,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     onHeightChange: PropTypes.func,
   };
   props: Props<T>;
-  state: State = {
-    inputWidth: 90,
-    wrapperHeight: 36,
-  };
+  state: State;
   wrapperWidth = windowWidth;
   spaceLeft = 0;
   // scroll to bottom
@@ -124,13 +126,19 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   static defaultProps = {
     tagColor: '#dddddd',
     tagTextColor: '#777777',
+    inputDefaultWidth: 90,
     inputColor: '#777777',
     maxHeight: 75,
   };
 
-  static inputWidth(text: string, spaceLeft: number, wrapperWidth: number) {
+  static inputWidth(
+    text: string,
+    spaceLeft: number,
+    inputDefaultWidth: number,
+    wrapperWidth: number
+  ) {
     if (text === "") {
-      return 90;
+      return inputDefaultWidth;
     } else if (spaceLeft >= 100) {
       return spaceLeft - 10;
     } else {
@@ -138,10 +146,19 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
+  constructor(props: Props<T>) {
+    super(props);
+    this.state = {
+      inputWidth: props.inputDefaultWidth,
+      wrapperHeight: 36,
+    }
+  }
+
   componentWillReceiveProps(nextProps: Props<T>) {
     const inputWidth = TagInput.inputWidth(
       nextProps.text,
       this.spaceLeft,
+      nextProps.inputDefaultWidth,
       this.wrapperWidth,
     );
     if (inputWidth !== this.state.inputWidth) {
@@ -170,6 +187,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     const inputWidth = TagInput.inputWidth(
       this.props.text,
       this.spaceLeft,
+      this.props.inputDefaultWidth,
       this.wrapperWidth,
     );
     if (inputWidth !== this.state.inputWidth) {
@@ -317,6 +335,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     const inputWidth = TagInput.inputWidth(
       this.props.text,
       this.spaceLeft,
+      this.props.inputDefaultWidth,
       this.wrapperWidth,
     );
     if (inputWidth !== this.state.inputWidth) {

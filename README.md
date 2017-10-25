@@ -30,6 +30,7 @@ import TagInput from 'react-native-tag-input';
 | tagTextColor | Text color of tags |
 | tagContainerStyle | Styling override for container surrounding tag text |
 | tagTextStyle | Styling override for tag's text component |
+| inputDefaultWidth | Width override for text input's default width when it's empty and showing placeholder |
 | inputColor | Color of text input |
 | inputProps | Any misc. TextInput props (autoFocus, placeholder, returnKeyType, etc.) |
 | maxHeight | Max height of the tag input on screen (will scroll if max height reached) |
