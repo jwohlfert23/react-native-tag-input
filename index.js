@@ -86,6 +86,10 @@ type OptionalProps = {
    * Callback that gets passed the new component height when it changes
    */
   onHeightChange?: (height: number) => void,
+  /**
+   * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
+  */
+  scrollViewProps: $PropertyType<ScrollView, 'props'>,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -111,6 +115,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
+    scrollViewProps: PropTypes.shape(ScrollView.propTypes),
   };
   props: Props<T>;
   state: State;
@@ -207,6 +212,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     const tags = [...this.props.value];
     tags.pop();
     this.props.onChange(tags);
+    this.scrollToRight();
     this.focus();
   }
 
@@ -232,6 +238,17 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
       "this.scrollView ref should exist before scrollToBottom called",
     );
     scrollView.scrollTo({ y, animated: true });
+  }
+
+  scrollToRight = () => {
+    const scrollView = this.scrollView;
+    invariant(
+      scrollView,
+      "this.scrollView ref should exist before scrollToEnd called",
+    );
+    setTimeout(() => {
+      scrollView.scrollToEnd({ animated: true });
+    }, 0);
   }
 
   render() {
@@ -263,6 +280,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
             onContentSizeChange={this.onScrollViewContentSizeChange}
             onLayout={this.onScrollViewLayout}
             keyboardShouldPersistTaps="handled"
+            {...this.props.scrollViewProps}
           >
             <View style={styles.tagInputContainer}>
               {tags}
