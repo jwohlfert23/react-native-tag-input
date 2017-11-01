@@ -22,6 +22,8 @@ import invariant from 'invariant';
 
 const windowWidth = Dimensions.get('window').width;
 
+type KeyboardShouldPersistTapsProps =
+  "always" | "never" | "handled" | false | true;
 type RequiredProps<T> = {
   /**
    * An array of tags, which can be any type, as long as labelExtractor below
@@ -89,7 +91,7 @@ type OptionalProps = {
   /**
    * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
   */
-  scrollViewProps?: Object,
+  scrollViewProps?: $PropertyType<ScrollView, 'props'>,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -265,7 +267,9 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
             ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
             onContentSizeChange={this.onScrollViewContentSizeChange}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps={
+              ("handled": KeyboardShouldPersistTapsProps)
+            }
             {...this.props.scrollViewProps}
           >
             <View style={styles.tagInputContainer}>
