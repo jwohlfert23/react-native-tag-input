@@ -35,3 +35,4 @@ import TagInput from 'react-native-tag-input';
 | inputProps | Any misc. TextInput props (autoFocus, placeholder, returnKeyType, etc.) |
 | maxHeight | Max height of the tag input on screen (will scroll if max height reached) |
 | onHeightChange | Callback that gets passed the new component height when it changes |
+| scrollViewProps | Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.) |

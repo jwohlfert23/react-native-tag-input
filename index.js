@@ -22,6 +22,8 @@ import invariant from 'invariant';
 
 const windowWidth = Dimensions.get('window').width;
 
+type KeyboardShouldPersistTapsProps =
+  "always" | "never" | "handled" | false | true;
 type RequiredProps<T> = {
   /**
    * An array of tags, which can be any type, as long as labelExtractor below
@@ -86,6 +88,10 @@ type OptionalProps = {
    * Callback that gets passed the new component height when it changes
    */
   onHeightChange?: (height: number) => void,
+  /**
+   * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
+  */
+  scrollViewProps?: $PropertyType<ScrollView, 'props'>,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -111,6 +117,8 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
+    // $FlowFixMe: identify EdgeInsetsPropType, PointPropType as React PropType
+    scrollViewProps: PropTypes.shape(ScrollView.propTypes),
   };
   props: Props<T>;
   state: State;
@@ -118,7 +126,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   spaceLeft = 0;
   // scroll to bottom
   contentHeight = 0;
-  scrollViewHeight = 0;
   // refs
   tagInput: ?TextInput = null;
   scrollView: ?ScrollView = null;
@@ -207,6 +214,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     const tags = [...this.props.value];
     tags.pop();
     this.props.onChange(tags);
+    this.scrollToEnd();
     this.focus();
   }
 
@@ -221,17 +229,15 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     this.props.onChange(tags);
   }
 
-  scrollToBottom = () => {
-    const y = this.contentHeight - this.scrollViewHeight;
-    if (y <= 0) {
-      return;
-    }
+  scrollToEnd = () => {
     const scrollView = this.scrollView;
     invariant(
       scrollView,
-      "this.scrollView ref should exist before scrollToBottom called",
+      "this.scrollView ref should exist before scrollToEnd called",
     );
-    scrollView.scrollTo({ y, animated: true });
+    setTimeout(() => {
+      scrollView.scrollToEnd({ animated: true });
+    }, 0);
   }
 
   render() {
@@ -261,8 +267,10 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
             ref={this.scrollViewRef}
             style={styles.tagInputContainerScroll}
             onContentSizeChange={this.onScrollViewContentSizeChange}
-            onLayout={this.onScrollViewLayout}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps={
+              ("handled": KeyboardShouldPersistTapsProps)
+            }
+            {...this.props.scrollViewProps}
           >
             <View style={styles.tagInputContainer}>
               {tags}
@@ -315,18 +323,12 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     if (nextWrapperHeight !== this.state.wrapperHeight) {
       this.setState(
         { wrapperHeight: nextWrapperHeight },
-        this.contentHeight < h ? this.scrollToBottom : undefined,
+        this.contentHeight < h ? this.scrollToEnd : undefined,
       );
     } else if (this.contentHeight < h) {
-      this.scrollToBottom();
+      this.scrollToEnd();
     }
     this.contentHeight = h;
-  }
-
-  onScrollViewLayout = (
-    event: { nativeEvent: { layout: { height: number } } },
-  ) => {
-    this.scrollViewHeight = event.nativeEvent.layout.height;
   }
 
   onLayoutLastTag = (endPosOfTag: number) => {
