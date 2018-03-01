@@ -223,6 +223,11 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     this.tagInput.focus();
   }
 
+  blur = () => {
+    invariant(this.tagInput, "should be set");
+    this.tagInput.blur();
+  }
+
   removeIndex = (index: number) => {
     const tags = [...this.props.value];
     tags.splice(index, 1);
@@ -239,6 +244,18 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
       scrollView.scrollToEnd({ animated: true });
     }, 0);
   }
+
+  scrollToTop = () => {
+    const scrollView = this.scrollView;
+    invariant(
+      scrollView,
+      "this.scrollView ref should exist before scrollToEnd called",
+    );
+    setTimeout(() => {
+      scrollView.scrollTo({x: 0, y: 0, animated: true });
+    }, 0);
+  }
+
 
   render() {
     const tags = this.props.value.map((tag, index) => (
