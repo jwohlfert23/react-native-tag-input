@@ -92,6 +92,10 @@ type OptionalProps = {
    * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
   */
   scrollViewProps?: $PropertyType<ScrollView, 'props'>,
+  /**
+   * Get TextInput ref
+   */
+  inputRef: func
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -119,6 +123,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     onHeightChange: PropTypes.func,
     // $FlowFixMe: identify EdgeInsetsPropType, PointPropType as React PropType
     scrollViewProps: PropTypes.shape(ScrollView.propTypes),
+    inputRef: PropTypes.func
   };
   props: Props<T>;
   state: State;
@@ -308,6 +313,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   tagInputRef = (tagInput: ?React.ElementRef<typeof TextInput>) => {
     invariant(typeof tagInput === "object", "TextInput ref is object");
     this.tagInput = tagInput;
+    if (this.props.inputRef) this.props.inputRef(tagInput);
   }
 
   scrollViewRef = (scrollView: ?React.ElementRef<typeof ScrollView>) => {
