@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
 } from 'react-native';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 const { width } = Dimensions.get('window');

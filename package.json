@@ -5,8 +5,9 @@
   "author": "Jack Wohlfert (https://github.com/jwohlfert23)",
   "devDependencies": {
     "lodash": "^3.2.0",
-    "react": "^15.0.2",
-    "react-native": "^0.26.2"
+    "react": "^16.3.2",
+    "react-native": "^0.26.2",
+    "prop-types": "^15.6.1"
   },
   "keywords": [
     "email input",
