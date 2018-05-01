@@ -92,6 +92,10 @@ type OptionalProps = {
    * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
   */
   scrollViewProps?: $PropertyType<ScrollView, 'props'>,
+  /**
+   * Placeholder
+   */
+  placeholder: string,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -119,6 +123,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     onHeightChange: PropTypes.func,
     // $FlowFixMe: identify EdgeInsetsPropType, PointPropType as React PropType
     scrollViewProps: PropTypes.shape(ScrollView.propTypes),
+    placeholder: PropTypes.string,
   };
   props: Props<T>;
   state: State;
@@ -136,6 +141,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputDefaultWidth: 90,
     inputColor: '#777777',
     maxHeight: 75,
+    placeholder: 'Start typing'
   };
 
   static inputWidth(
@@ -211,6 +217,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     if (this.props.text !== '' || event.nativeEvent.key !== 'Backspace') {
       return;
     }
+    return;
     const tags = [...this.props.value];
     tags.pop();
     this.props.onChange(tags);
@@ -291,7 +298,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
                   onChangeText={this.props.onChangeText}
                   autoCapitalize="none"
                   autoCorrect={false}
-                  placeholder="Start typing"
+                  placeholder={this.props.placeholder}
                   returnKeyType="done"
                   keyboardType="default"
                   underlineColorAndroid="rgba(0,0,0,0)"
@@ -458,7 +465,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginRight: 3,
     padding: 8,
-    height: 24,
+    height: 30,
     borderRadius: 2,
   },
   tagText: {
