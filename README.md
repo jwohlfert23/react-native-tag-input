@@ -4,7 +4,7 @@
 
 Simple Example
 
-```
+```jsx
 import TagInput from 'react-native-tag-input';
 
 ...
@@ -25,6 +25,7 @@ import TagInput from 'react-native-tag-input';
 | labelExtractor       | (Required) Function to extract string value for label from item                                                                                                                                                                    |
 | text                 | (Required) The text currently being displayed in the TextInput following the list of tags                                                                                                                                          |
 | onChangeText         | (Required) This callback gets called when the user types in the TextInput. The parent should update the text prop when this is called if they want to enable input. This is also where any parsing to detect new tags should occur |
+| editable             | If false, text input is not editable and existing tags cannot be removed. (default is `true`)                                                                                                                                      |
 | tagColor             | Background color of tags                                                                                                                                                                                                           |
 | tagTextColor         | Text color of tags                                                                                                                                                                                                                 |
 | tagContainerStyle    | Styling override for container surrounding tag text                                                                                                                                                                                |
