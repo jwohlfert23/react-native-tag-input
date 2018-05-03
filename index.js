@@ -118,11 +118,9 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     tagTextStyle: Text.propTypes.style,
     inputDefaultWidth: PropTypes.number,
     inputColor: PropTypes.string,
-    // $FlowFixMe(>=0.49.0): https://github.com/facebook/react-native/pull/16437
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
-    // $FlowFixMe: identify EdgeInsetsPropType, PointPropType as React PropType
     scrollViewProps: PropTypes.shape(ScrollView.propTypes),
   };
   props: Props<T>;
