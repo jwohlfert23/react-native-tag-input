@@ -53,6 +53,10 @@ type RequiredProps<T> = {
 };
 type OptionalProps = {
   /**
+   * If false, text input is not editable and existing tags cannot be removed.
+   */
+  editable: boolean,
+  /**
    * Background color of tags
    */
   tagColor: string,
@@ -107,6 +111,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     labelExtractor: PropTypes.func.isRequired,
     text: PropTypes.string.isRequired,
     onChangeText: PropTypes.func.isRequired,
+    editable: PropTypes.bool,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
     tagContainerStyle: ViewPropTypes.style,
@@ -131,6 +136,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   scrollView: ?ScrollView = null;
 
   static defaultProps = {
+    editable: true,
     tagColor: '#dddddd',
     tagTextColor: '#777777',
     inputDefaultWidth: 90,
@@ -253,6 +259,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
         tagContainerStyle={this.props.tagContainerStyle}
         tagTextStyle={this.props.tagTextStyle}
         key={index}
+        editable={this.props.editable}
       />
     ));
 
@@ -294,6 +301,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
                   placeholder="Start typing"
                   returnKeyType="done"
                   keyboardType="default"
+                  editable={this.props.editable}
                   underlineColorAndroid="rgba(0,0,0,0)"
                   {...this.props.inputProps}
                 />
@@ -350,7 +358,8 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
 type TagProps = {
   index: number,
   label: string,
-  isLastTag: bool,
+  isLastTag: boolean,
+  editable: boolean,
   onLayoutLastTag: (endPosOfTag: number) => void,
   removeIndex: (index: number) => void,
   tagColor: string,
@@ -365,6 +374,7 @@ class Tag extends React.PureComponent<TagProps> {
     index: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,
     isLastTag: PropTypes.bool.isRequired,
+    editable: PropTypes.bool.isRequired,
     onLayoutLastTag: PropTypes.func.isRequired,
     removeIndex: PropTypes.func.isRequired,
     tagColor: PropTypes.string.isRequired,
@@ -388,6 +398,7 @@ class Tag extends React.PureComponent<TagProps> {
   render() {
     return (
       <TouchableOpacity
+        disabled={!this.props.editable}
         onPress={this.onPress}
         onLayout={this.onLayoutLastTag}
         style={[
