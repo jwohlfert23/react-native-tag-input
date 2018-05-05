@@ -217,7 +217,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     if (this.props.text !== '' || event.nativeEvent.key !== 'Backspace') {
       return;
     }
-    return;
     const tags = [...this.props.value];
     tags.pop();
     this.props.onChange(tags);
