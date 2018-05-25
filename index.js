@@ -38,7 +38,7 @@ type RequiredProps<T> = {
   /**
    * Function to extract string value for label from item
    */
-  labelExtractor: (tagData: T) => string,
+  labelExtractor: (tagData: T) => string | React.Component<*, *>,
   /**
    * The text currently being displayed in the TextInput following the list of
    * tags
@@ -355,7 +355,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
 
 type TagProps = {
   index: number,
-  label: string,
+  label: string | React.Component<*, *>,
   isLastTag: boolean,
   editable: boolean,
   onLayoutLastTag: (endPosOfTag: number) => void,
@@ -370,7 +370,7 @@ class Tag extends React.PureComponent<TagProps> {
   props: TagProps;
   static propTypes = {
     index: PropTypes.number.isRequired,
-    label: PropTypes.string.isRequired,
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
     isLastTag: PropTypes.bool.isRequired,
     editable: PropTypes.bool.isRequired,
     onLayoutLastTag: PropTypes.func.isRequired,
@@ -405,14 +405,15 @@ class Tag extends React.PureComponent<TagProps> {
           this.props.tagContainerStyle,
         ]}
       >
-        <Text style={[
+        {React.isValidElement(this.props.label) ? this.props.label :
+         <Text style={[
           styles.tagText,
           { color: this.props.tagTextColor },
           this.props.tagTextStyle,
         ]}>
           {this.props.label}
           &nbsp;&times;
-        </Text>
+        </Text>}
       </TouchableOpacity>
     );
   }
