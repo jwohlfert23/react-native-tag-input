@@ -38,7 +38,7 @@ type RequiredProps<T> = {
   /**
    * Function to extract string value for label from item
    */
-  labelExtractor: (tagData: T) => string | React.Component<*, *>,
+  labelExtractor: (tagData: T) => string | React.Element<any>,
   /**
    * The text currently being displayed in the TextInput following the list of
    * tags
@@ -355,7 +355,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
 
 type TagProps = {
   index: number,
-  label: string | React.Component<*, *>,
+  label: string | React.Element<any>,
   isLastTag: boolean,
   editable: boolean,
   onLayoutLastTag: (endPosOfTag: number) => void,
