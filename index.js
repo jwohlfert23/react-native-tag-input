@@ -397,8 +397,7 @@ class Tag extends React.PureComponent<TagProps> {
     let tagLabel;
     if (React.isValidElement(this.props.label)) {
       tagLabel = this.props.label;
-    }
-    else {
+    } else {
       tagLabel = (
         <Text style={[
             styles.tagText,
@@ -410,7 +409,6 @@ class Tag extends React.PureComponent<TagProps> {
         </Text>
       );
     }
-        
     return (
       <TouchableOpacity
         disabled={!this.props.editable}
