@@ -394,6 +394,23 @@ class Tag extends React.PureComponent<TagProps> {
   }
 
   render() {
+    let tagLabel;
+    if (React.isValidElement(this.props.label)) {
+      tagLabel = this.props.label;
+    }
+    else {
+      tagLabel = (
+        <Text style={[
+            styles.tagText,
+            { color: this.props.tagTextColor },
+            this.props.tagTextStyle,
+          ]}>
+            {this.props.label}
+            &nbsp;&times;
+        </Text>
+      );
+    }
+        
     return (
       <TouchableOpacity
         disabled={!this.props.editable}
@@ -405,15 +422,7 @@ class Tag extends React.PureComponent<TagProps> {
           this.props.tagContainerStyle,
         ]}
       >
-        {React.isValidElement(this.props.label) ? this.props.label :
-         <Text style={[
-          styles.tagText,
-          { color: this.props.tagTextColor },
-          this.props.tagTextStyle,
-        ]}>
-          {this.props.label}
-          &nbsp;&times;
-        </Text>}
+        {tagLabel}
       </TouchableOpacity>
     );
   }
