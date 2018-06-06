@@ -111,6 +111,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     labelExtractor: PropTypes.func.isRequired,
     text: PropTypes.string.isRequired,
     onChangeText: PropTypes.func.isRequired,
+    placeholder: PropTypes.string,
     editable: PropTypes.bool,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
@@ -136,6 +137,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   static defaultProps = {
     editable: true,
     tagColor: '#dddddd',
+    placeholder: 'Start typing',
     tagTextColor: '#777777',
     inputDefaultWidth: 90,
     inputColor: '#777777',
@@ -208,7 +210,14 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
 
   onBlur = (event: { nativeEvent: { text: string } }) => {
     invariant(Platform.OS === "ios", "only iOS gets text on TextInput.onBlur");
-    this.props.onChangeText(event.nativeEvent.text);
+    const newText = event.nativeEvent.text;
+    this.props.onChangeText(event.nativeEvent.text + (newText.length ? '\n' : ''));
+  }
+  
+  onSubmitEditing = (event: { nativeEvent: { text: string } }) => {
+    invariant(Platform.OS === "ios", "only iOS gets text on TextInput.onSubmitEditing");
+    const newText = event.nativeEvent.text;
+    this.props.onChangeText(event.nativeEvent.text + (newText.length ? '\n' : ''));
   }
 
   onKeyPress = (event: { nativeEvent: { key: string } }) => {
@@ -216,7 +225,6 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
       return;
     }
     const tags = [...this.props.value];
-    //tags.pop();
     this.props.onChange(tags);
     this.scrollToEnd();
     this.focus();
@@ -286,6 +294,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
                 <TextInput
                   ref={this.tagInputRef}
                   blurOnSubmit={false}
+                  onSubmitEditing={Platform.OS === "ios" ? this.onSubmitEditing : undefined}
                   onKeyPress={this.onKeyPress}
                   value={this.props.text}
                   style={[styles.textInput, {
@@ -296,7 +305,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
                   onChangeText={this.props.onChangeText}
                   autoCapitalize="none"
                   autoCorrect={false}
-                  placeholder="Start typing"
+                  placeholder={this.props.placeholder}
                   returnKeyType="done"
                   keyboardType="default"
                   editable={this.props.editable}
@@ -459,16 +468,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
+    paddingTop: 6,
   },
   textInput: {
     height: 36,
     fontSize: 16,
     flex: .6,
-    marginBottom: 6,
     padding: 0,
   },
   textInputContainer: {
     height: 36,
+    justifyContent: 'center',
   },
   tag: {
     justifyContent: 'center',
