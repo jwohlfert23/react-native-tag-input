@@ -112,6 +112,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     text: PropTypes.string.isRequired,
     onChangeText: PropTypes.func.isRequired,
     placeholder: PropTypes.string,
+    blurOnSubmit: PropTypes.bool,
     editable: PropTypes.bool,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
@@ -142,6 +143,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputDefaultWidth: 90,
     inputColor: '#777777',
     maxHeight: 75,
+    blurOnSubmit: false,
   };
 
   static inputWidth(
@@ -293,7 +295,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
               ]}>
                 <TextInput
                   ref={this.tagInputRef}
-                  blurOnSubmit={false}
+                  blurOnSubmit={this.props.blurOnSubmit}
                   onSubmitEditing={Platform.OS === "ios" ? this.onSubmitEditing : undefined}
                   onKeyPress={this.onKeyPress}
                   value={this.props.text}
