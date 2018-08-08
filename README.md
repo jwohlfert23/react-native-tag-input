@@ -26,7 +26,7 @@ Prop | Description | Type | Default
 **`labelExtractor`** | A function to extract string value for label from item. May also return an element to be shown in place of text, in which case the tagTextColor and tagTextStyle props will be ignored. | Function | **Required**
 **`text`** | The text currently being displayed in the TextInput following the list of tags | String | **Required**
 **`onChangeText`** | This callback gets called when the user types in the TextInput. The parent should update the text prop when this is called if they want to enable input. This is also where any parsing to detect new tags should occur | Function | **Required**
-`editable` | If false, text input is not editable and existing tags cannot be removed | Boolean | `false`
+`editable` | If false, text input is not editable and existing tags cannot be removed | Boolean | `true`
 `tagColor` | Background color of tags | String | `'#dddddd'`
 `tagTextColor` | Text color of tags | String | `'#777777'`
 `tagContainerStyle` | Styling override for container surrounding tag text | Object | `undefined`
