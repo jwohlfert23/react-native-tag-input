@@ -165,7 +165,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
-  componentWillReceiveProps(nextProps: Props<T>) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props<T>) {
     const inputWidth = TagInput.inputWidth(
       nextProps.text,
       this.spaceLeft,
@@ -184,7 +184,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
-  componentWillUpdate(nextProps: Props<T>, nextState: State) {
+  UNSAFE_componentWillUpdate(nextProps: Props<T>, nextState: State) {
     if (
       this.props.onHeightChange &&
       nextState.wrapperHeight !== this.state.wrapperHeight
@@ -382,7 +382,7 @@ class Tag extends React.PureComponent<TagProps> {
   };
   curPos: ?number = null;
 
-  componentWillReceiveProps(nextProps: TagProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: TagProps) {
     if (
       !this.props.isLastTag &&
       nextProps.isLastTag &&
