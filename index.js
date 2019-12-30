@@ -23,7 +23,7 @@ import invariant from 'invariant';
 const windowWidth = Dimensions.get('window').width;
 
 type KeyboardShouldPersistTapsProps =
-  "always" | "never" | "handled" | false | true;
+"always" | "never" | "handled" | false | true;
 type RequiredProps<T> = {
   /**
    * An array of tags, which can be any type, as long as labelExtractor below
@@ -94,13 +94,14 @@ type OptionalProps = {
   onHeightChange?: (height: number) => void,
   /**
    * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
-  */
+   */
   scrollViewProps?: $PropertyType<ScrollView, 'props'>,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
   inputWidth: number,
   wrapperHeight: number,
+  contentHeight: number,
 };
 
 class TagInput<T> extends React.PureComponent<Props<T>, State> {
@@ -120,6 +121,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputColor: PropTypes.string,
     inputProps: PropTypes.shape(TextInput.propTypes),
     maxHeight: PropTypes.number,
+    minHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
     scrollViewProps: PropTypes.shape(ScrollView.propTypes),
   };
@@ -140,6 +142,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputDefaultWidth: 90,
     inputColor: '#777777',
     maxHeight: 75,
+    minHeight: 30,
   };
 
   static inputWidth(
@@ -162,34 +165,24 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     this.state = {
       inputWidth: props.inputDefaultWidth,
       wrapperHeight: 36,
-    }
+      contentHeight: 0,
+    };
   }
 
-  componentWillReceiveProps(nextProps: Props<T>) {
-    const inputWidth = TagInput.inputWidth(
-      nextProps.text,
-      this.spaceLeft,
-      nextProps.inputDefaultWidth,
-      this.wrapperWidth,
+  static getDerivedStateFromProps(props: Props<T>, state: State) {
+    const wrapperHeight = Math.max(
+      Math.min(props.maxHeight, state.contentHeight),
+      props.minHeight,
     );
-    if (inputWidth !== this.state.inputWidth) {
-      this.setState({ inputWidth });
-    }
-    const wrapperHeight = Math.min(
-      nextProps.maxHeight,
-      this.contentHeight,
-    );
-    if (wrapperHeight !== this.state.wrapperHeight) {
-      this.setState({ wrapperHeight });
-    }
+    return { wrapperHeight };
   }
 
-  componentWillUpdate(nextProps: Props<T>, nextState: State) {
+  componentDidUpdate(prevProps: Props<T>, prevState: State) {
     if (
       this.props.onHeightChange &&
-      nextState.wrapperHeight !== this.state.wrapperHeight
+      this.state.wrapperHeight !== prevState.wrapperHeight
     ) {
-      this.props.onHeightChange(nextState.wrapperHeight);
+      this.props.onHeightChange(this.state.wrapperHeight);
     }
   }
 
@@ -280,18 +273,18 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
             <View style={styles.tagInputContainer}>
               {tags}
               <View style={[
-                styles.textInputContainer,
-                { width: this.state.inputWidth },
-              ]}>
+                  styles.textInputContainer,
+                  { width: this.state.inputWidth },
+                ]}>
                 <TextInput
                   ref={this.tagInputRef}
                   blurOnSubmit={false}
                   onKeyPress={this.onKeyPress}
                   value={this.props.text}
                   style={[styles.textInput, {
-                    width: this.state.inputWidth,
-                    color: this.props.inputColor,
-                  }]}
+                      width: this.state.inputWidth,
+                      color: this.props.inputColor,
+                    }]}
                   onBlur={Platform.OS === "ios" ? this.onBlur : undefined}
                   onChangeText={this.props.onChangeText}
                   autoCapitalize="none"
@@ -322,20 +315,24 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
   }
 
   onScrollViewContentSizeChange = (w: number, h: number) => {
-    if (this.contentHeight === h) {
+    const oldContentHeight = this.state.contentHeight;
+    if (h === oldContentHeight) {
       return;
     }
-    const nextWrapperHeight = Math.min(this.props.maxHeight, h);
-    if (nextWrapperHeight !== this.state.wrapperHeight) {
-      this.setState(
-        { wrapperHeight: nextWrapperHeight },
-        this.contentHeight < h ? this.scrollToEnd : undefined,
-      );
-    } else if (this.contentHeight < h) {
-      this.scrollToEnd();
+
+    let callback;
+    if (h > oldContentHeight) {
+      callback = () => {
+        if (this.scrollViewHeight === this.props.maxHeight) {
+          this.scrollToBottom();
+        } else {
+          this.scrollToBottomAfterNextScrollViewLayout = true;
+        }
+      };
     }
-    this.contentHeight = h;
-  }
+
+    this.setState({ contentHeight: h }, callback);
+  };
 
   onLayoutLastTag = (endPosOfTag: number) => {
     const margin = 3;
@@ -382,10 +379,10 @@ class Tag extends React.PureComponent<TagProps> {
   };
   curPos: ?number = null;
 
-  componentWillReceiveProps(nextProps: TagProps) {
+  componentDidUpdate(prevProps: TagProps) {
     if (
-      !this.props.isLastTag &&
-      nextProps.isLastTag &&
+      !prevProps.isLastTag &&
+      this.props.isLastTag &&
       this.curPos !== null &&
       this.curPos !== undefined
     ) {
@@ -404,8 +401,8 @@ class Tag extends React.PureComponent<TagProps> {
             { color: this.props.tagTextColor },
             this.props.tagTextStyle,
           ]}>
-            {this.props.label}
-            &nbsp;&times;
+          {this.props.label}
+          &nbsp;&times;
         </Text>
       );
     }
@@ -431,7 +428,7 @@ class Tag extends React.PureComponent<TagProps> {
 
   onLayoutLastTag = (
     event: { nativeEvent: { layout: { x: number, width: number } } },
-  ) => {
+    ) => {
     const layout = event.nativeEvent.layout;
     this.curPos = layout.width + layout.x;
     if (this.props.isLastTag) {
