@@ -15,7 +15,6 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   ScrollView,
-  ViewPropTypes,
   Platform,
 } from 'react-native';
 import invariant from 'invariant';
@@ -115,7 +114,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     editable: PropTypes.bool,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
-    tagContainerStyle: ViewPropTypes.style,
+    tagContainerStyle: PropTypes.object,
     tagTextStyle: Text.propTypes.style,
     inputDefaultWidth: PropTypes.number,
     inputColor: PropTypes.string,
@@ -382,8 +381,8 @@ class Tag extends React.PureComponent<TagProps> {
     removeIndex: PropTypes.func.isRequired,
     tagColor: PropTypes.string.isRequired,
     tagTextColor: PropTypes.string.isRequired,
-    tagContainerStyle: ViewPropTypes.style,
-    tagTextStyle: Text.propTypes.style,
+    tagContainerStyle: PropTypes.object,
+    tagTextStyle: PropTypes.object,
     showCross: PropTypes.bool.isRequired,
   };
   curPos: ?number = null;
