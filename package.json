@@ -15,9 +15,6 @@
   "license": "MIT",
   "main": "index.js",
   "types": "index.d.ts",
-  "files": [
-    "index.js"
-  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:jwohlfert23/react-native-tag-input.git"
