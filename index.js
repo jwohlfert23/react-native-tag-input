@@ -15,7 +15,6 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   ScrollView,
-  ViewPropTypes,
   Platform,
 } from 'react-native';
 import invariant from 'invariant';
@@ -94,8 +93,9 @@ type OptionalProps = {
   onHeightChange?: (height: number) => void,
   /**
    * Any ScrollView props (horizontal, showsHorizontalScrollIndicator, etc.)
-  */
+   */
   scrollViewProps?: $PropertyType<ScrollView, 'props'>,
+  showCross: boolean,
 };
 type Props<T> = RequiredProps<T> & OptionalProps;
 type State = {
@@ -114,7 +114,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     editable: PropTypes.bool,
     tagColor: PropTypes.string,
     tagTextColor: PropTypes.string,
-    tagContainerStyle: ViewPropTypes.style,
+    tagContainerStyle: PropTypes.object,
     tagTextStyle: Text.propTypes.style,
     inputDefaultWidth: PropTypes.number,
     inputColor: PropTypes.string,
@@ -122,6 +122,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     maxHeight: PropTypes.number,
     onHeightChange: PropTypes.func,
     scrollViewProps: PropTypes.shape(ScrollView.propTypes),
+    showCross: PropTypes.bool,
   };
   props: Props<T>;
   state: State;
@@ -140,6 +141,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     inputDefaultWidth: 90,
     inputColor: '#777777',
     maxHeight: 75,
+    showCross: true,
   };
 
   static inputWidth(
@@ -165,7 +167,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
-  componentWillReceiveProps(nextProps: Props<T>) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props<T>) {
     const inputWidth = TagInput.inputWidth(
       nextProps.text,
       this.spaceLeft,
@@ -184,7 +186,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
     }
   }
 
-  componentWillUpdate(nextProps: Props<T>, nextState: State) {
+  UNSAFE_componentWillUpdate(nextProps: Props<T>, nextState: State) {
     if (
       this.props.onHeightChange &&
       nextState.wrapperHeight !== this.state.wrapperHeight
@@ -258,6 +260,7 @@ class TagInput<T> extends React.PureComponent<Props<T>, State> {
         tagTextStyle={this.props.tagTextStyle}
         key={index}
         editable={this.props.editable}
+        showCross={this.props.showCross}
       />
     ));
 
@@ -364,6 +367,7 @@ type TagProps = {
   tagTextColor: string,
   tagContainerStyle?: StyleObj,
   tagTextStyle?: StyleObj,
+  showCross: boolean,
 };
 class Tag extends React.PureComponent<TagProps> {
 
@@ -377,12 +381,13 @@ class Tag extends React.PureComponent<TagProps> {
     removeIndex: PropTypes.func.isRequired,
     tagColor: PropTypes.string.isRequired,
     tagTextColor: PropTypes.string.isRequired,
-    tagContainerStyle: ViewPropTypes.style,
-    tagTextStyle: Text.propTypes.style,
+    tagContainerStyle: PropTypes.object,
+    tagTextStyle: PropTypes.object,
+    showCross: PropTypes.bool.isRequired,
   };
   curPos: ?number = null;
 
-  componentWillReceiveProps(nextProps: TagProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: TagProps) {
     if (
       !this.props.isLastTag &&
       nextProps.isLastTag &&
@@ -398,16 +403,28 @@ class Tag extends React.PureComponent<TagProps> {
     if (React.isValidElement(this.props.label)) {
       tagLabel = this.props.label;
     } else {
-      tagLabel = (
-        <Text style={[
+      if (this.props.showCross === true) {
+        tagLabel = (
+          <Text style={[
             styles.tagText,
             { color: this.props.tagTextColor },
             this.props.tagTextStyle,
           ]}>
             {this.props.label}
             &nbsp;&times;
-        </Text>
-      );
+          </Text>
+        );
+      } else {
+        tagLabel = (
+          <Text style={[
+            styles.tagText,
+            { color: this.props.tagTextColor },
+            this.props.tagTextStyle,
+          ]}>
+            {this.props.label}
+          </Text>
+        );
+      }
     }
     return (
       <TouchableOpacity
